@@ -1,0 +1,8 @@
+1. Implement a simple chat application that allows chat between two users.
+2. Group Chat feature.
+3. Cryptography.
+4. End to End Encryption.
+5. File Transfer + Image Transfer.
+6. Service.
+7. Screen Sharing.
+

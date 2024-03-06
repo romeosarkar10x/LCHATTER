@@ -1,0 +1,13 @@
+*.exe
+*.bin
+
+*.in
+*.out
+
+*.obj
+*.lib
+*.dll
+
+*.vscode/
+
+*.log
