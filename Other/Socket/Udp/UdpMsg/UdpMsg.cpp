@@ -1,4 +1,4 @@
-#include "../../Common/Address.cpp"
+#include "../../../../Common/Addr.cpp"
 
 /*
 
@@ -16,13 +16,13 @@
 // 
 
 
-enum class IncomingMessageType : unsigned char { None, Ping, Connect, ChatMessage };
-
-class IncomingMessage
+class UdpMsg
 {
-  enum class Type : char { INV = -1, NONE, PING, MSG, CONN, CONN_ACK } _m_message_type;
-  Address _m_sender;
-
 public:
-  // IncomingMessageType ;
+  enum class Type : char { INV = -1, NONE, PING, CHAT_MSG, CONN, CONN_ACK };
+  UdpMsg() = default;
+  constexpr UdpMsg(Type msg_type) : _m_msg_type { msg_type } {}
+
+private:
+  Type _m_msg_type { Type::NONE };
 };
