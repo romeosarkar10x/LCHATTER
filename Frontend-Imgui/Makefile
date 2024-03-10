@@ -24,6 +24,8 @@ SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/app_base.cpp $(SRC_DIR)/chat.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 SOURCES += $(IMPLOT_DIR)/implot.cpp $(IMPLOT_DIR)/implot_items.cpp
+
+include $(sources:.c=.d) 
 OBJS = $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
@@ -75,16 +77,43 @@ endif
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-$(OBJ_DIR)/%.o:$(SRC_DIR)/%.cpp
+include	$(addprefix $(OBJ_DIR)/, $(addsuffix .d, $(basename $(notdir $(SOURCES)))))
+
+$(OBJ_DIR)/%.d: $(SRC_DIR)/%.cpp
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+	
+$(OBJ_DIR)/%.d: $(IMGUI_DIR)/%.cpp
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+$(OBJ_DIR)/%.d: $(IMGUI_DIR)/backends/%.cpp
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+$(OBJ_DIR)/%.d: $(IMPLOT_DIR)/%.cpp
+	@set -e; rm -f $@; \
+	$(CC) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+
+$(OBJ_DIR)/%.o:$(SRC_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)/%.o:$(IMGUI_DIR)/%.cpp
+$(OBJ_DIR)/%.o:$(IMGUI_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
+$(OBJ_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)/%.o:$(IMPLOT_DIR)/%.cpp
+$(OBJ_DIR)/%.o:$(IMPLOT_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 all: $(EXE)
@@ -94,4 +123,7 @@ $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(EXE) $(OBJS)
+	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d
+
+.DEFAULT_GOAL := all
+.PHONY: clean

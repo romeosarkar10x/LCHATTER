@@ -37,7 +37,7 @@
 // Note that 'ImGui::' being a namespace, you can add functions into the namespace from your own source files, without
 // modifying imgui.h or imgui.cpp. You may include imgui_internal.h to access internal data structures, but it doesn't
 // come with any guarantee of forward compatibility. Discussing your changes on the GitHub Issue Tracker may lead you
-// to a better solution or official support for them.
+// to a better solution or official support for them..
 
 /*
 
@@ -21393,7 +21393,7 @@ void ImGui::UpdateDebugToolStackQueries()
         g.DebugHookIdInfo = tool->Results[stack_level].ID;
         tool->Results[stack_level].QueryFrameCount++;
     }
-}
+};
 
 // [DEBUG] ID Stack tool: hooks called by GetID() family functions
 void ImGui::DebugHookIdInfo(ImGuiID id, ImGuiDataType data_type, const void* data_id, const void* data_id_end)

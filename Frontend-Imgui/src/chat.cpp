@@ -1,4 +1,4 @@
-#include "chat.h"
+#include "chat.hpp"
 
 Chat::Chat()
 {
