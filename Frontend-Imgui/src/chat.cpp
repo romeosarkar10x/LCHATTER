@@ -1,5 +1,37 @@
 #include "chat.hpp"
 
+// Sample names - expand as needed
+std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
+
+// Generates 20 dummy contacts and conversations
+std::vector<Conversation> generateDummyData()
+{
+  std::vector<Conversation> conversations;
+  std::random_device rd;
+  std::mt19937 rng(rd());
+
+  for (int i = 0; i < static_cast<int>(contactNames.size()); ++i)
+  {
+    Conversation conv;
+    conv.contactName = contactNames[i];
+
+    // Generate some random messages
+    int numMessages = rng() % 5 + 2; // Between 2 to 7 messages
+    for (int j = 0; j < numMessages; ++j)
+    {
+      Message msg;
+      msg.sender = (rng() % 2 == 0) ? "You" : conv.contactName; // Alternate sender
+      msg.content = "Sample Message " + std::to_string(j + 1);
+      msg.timestamp = time(nullptr) - (rng() % 864000); // Within the last 10 days
+      conv.messages.push_back(msg);
+    }
+
+    conversations.push_back(conv);
+  }
+
+  return conversations;
+}
+
 Chat::Chat()
 {
 }
@@ -8,54 +40,32 @@ void Chat::StartUp()
 {
   // Load a new font
   ImGuiIO &io = ImGui::GetIO();
-  io.Fonts->AddFontFromFileTTF("./assets/fonts/helvetica-neue-5-cufonfonts/HelveticaNeueMedium.otf", 18.0f);
+  io.Fonts->AddFontFromFileTTF("assets/fonts/CascadiaCode/CaskaydiaCoveNerdFont-Regular.ttf", 18.0f);
 
   // Adjust ImGui style parameters
   // ImGuiStyle &style = ImGui::GetStyle();
+
+  conversations = generateDummyData();
 }
 
 void Chat::Update()
 {
-  ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize); // Set window size to match GLFW window size
-  ImGui::SetNextWindowPos(ImVec2(0, 0));                // Set window position to top-left corner
-
-  ImGui::Begin("Chat App", nullptr,
-               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove); // Begin ImGui window
-
-  // Chat interface
-  ImGui::Text("Chat Messages:");
-  ImGui::Separator();
-
-  // Example chat messages
-  ImGui::Text("User1: Hello!");
-  ImGui::Text("User2: Hi there!");
-  ImGui::Text("User1: How are you?");
-  ImGui::Text("User2: I'm doing well, thanks!");
-
-  ImGui::Separator();
-
-  // Chat input
-  static char inputBuffer[256] = ""; // Buffer for user input
-  if (ImGui::InputText("##ChatInput", inputBuffer, IM_ARRAYSIZE(inputBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+  bool show_demo_window = true;
+  if (show_demo_window)
   {
-    // Enter key pressed, send the message
-    SendMessage(inputBuffer);
-    // Clear the input buffer
-    memset(inputBuffer, 0, sizeof(inputBuffer));
+    ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
+    ImGui::ShowDemoWindow(&show_demo_window);
   }
-
-  // Set focus to the input field
-  ImGui::SetKeyboardFocusHere(-1);
-
-  ImGui::End(); // End ImGui window
 }
 
 // The callbacks are updated and called BEFORE the Update loop is entered
-// It can be assumed that inside the Update loop all callbacks have already been processed
+// It can be assumed that inside the Update loop all callbacks have already been
+// processed
 void Chat::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-  // For Dear ImGui to work it is necessary to queue if the mouse signal is already processed by Dear ImGui
-  // Only if the mouse is not already captured it should be used here.
+  // For Dear ImGui to work it is necessary to queue if the mouse signal is
+  // already processed by Dear ImGui Only if the mouse is not already captured
+  // it should be used here.
   ImGuiIO &io = ImGui::GetIO();
   if (!io.WantCaptureMouse)
   {
@@ -64,8 +74,9 @@ void Chat::MouseButtonCallback(GLFWwindow *window, int button, int action, int m
 
 void Chat::CursorPosCallback(GLFWwindow *window, double xpos, double ypos)
 {
-  // For Dear ImGui to work it is necessary to queue if the mouse signal is already processed by Dear ImGui
-  // Only if the mouse is not already captured it should be used here.
+  // For Dear ImGui to work it is necessary to queue if the mouse signal is
+  // already processed by Dear ImGui Only if the mouse is not already captured
+  // it should be used here.
   ImGuiIO &io = ImGui::GetIO();
   if (!io.WantCaptureMouse)
   {
@@ -74,8 +85,9 @@ void Chat::CursorPosCallback(GLFWwindow *window, double xpos, double ypos)
 
 void Chat::KeyCallback(GLFWwindow *window, int key, int scancode, int actions, int mods)
 {
-  // For Dear ImGui to work it is necessary to queue if the keyboard signal is already processed by Dear ImGui
-  // Only if the keyboard is not already captured it should be used here.
+  // For Dear ImGui to work it is necessary to queue if the keyboard signal is
+  // already processed by Dear ImGui Only if the keyboard is not already
+  // captured it should be used here.
   ImGuiIO &io = ImGui::GetIO();
   if (!io.WantCaptureKeyboard)
   {
