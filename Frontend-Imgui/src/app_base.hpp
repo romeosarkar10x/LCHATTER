@@ -52,9 +52,9 @@ public:
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform
-                                                        // Windows
+    // Windows
     // io.ConfigViewportsNoAutoMerge = true;
     // io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -63,12 +63,11 @@ public:
     ImVec4 *colors = style.Colors;
 
     // SetTheme(colors, "dracula");
-    // SetTheme(colors, "neon");
-    SetTheme(colors, "monokai");
+    SetTheme(colors, "neon");
+    // SetTheme(colors, "monokai");
     // SetTheme(colors, "cyberpunk");
     // SetTheme(colors, "node");
     // SetTheme(colors, "highcontrast");
-
 
     style.WindowPadding = ImVec2(10.0f, 10.0f);
     style.FramePadding = ImVec2(6.0f, 4.0f);
@@ -94,7 +93,7 @@ public:
     style.TabRounding = 3;
 
     // final scaling
-    style.ScaleAllSizes(2.5f);
+    style.ScaleAllSizes(2.0f);
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);

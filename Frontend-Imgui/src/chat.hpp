@@ -10,36 +10,40 @@
 #include "app_base.hpp"
 
 // Structure for a single message
-struct Message {
+struct Message
+{
   std::string sender;
   std::string content;
   time_t timestamp;
 };
 
 // Structure for a conversation
-struct Conversation {
-  std::string contactName;  // Or contact ID if you have one
+struct Conversation
+{
+  std::string contactName; // Or contact ID if you have one
   std::vector<Message> messages;
 };
 
-class Chat : public AppBase<Chat> {
- public:
+class Chat : public AppBase<Chat>
+{
+public:
   Chat();
   ~Chat() = default;
 
   void StartUp();
   void Update();
 
-  static void MouseButtonCallback(GLFWwindow *window, int button, int action,
-                                  int mods);
+  static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
   static void CursorPosCallback(GLFWwindow *window, double xpos, double ypos);
-  static void KeyCallback(GLFWwindow *window, int key, int scancode,
-                          int actions, int mods);
+  static void KeyCallback(GLFWwindow *window, int key, int scancode, int actions, int mods);
 
- private:
+private:
   void SendMessage(const char *message);
+  void LoginWindow();
+  void ChatWindow();
   std::vector<Conversation> conversations;
   int selectedConversationIndex = -1;
+  ImFont *headingFont, *normalFont;
 };
 
-#endif  // CHAT_H
+#endif // CHAT_H
