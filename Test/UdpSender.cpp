@@ -1,24 +1,22 @@
-#include <iostream>
+// #include <iostream>
+#include <cstdio>
 #include <winsock2.h>
 
 #include "../Other/Socket/Udp/UdpSender.cpp"
 
 int main()
 {
-  WSAData wsa_data;
-  WSAStartup(MAKEWORD(2, 2), &wsa_data);
-  
-  Addr receiver_addr("127.0.0.1", 61506);
-  char* buf = new char[1000];
+  UdpSender s; s.init();
 
-  UdpSender s;
+  char* buf = new char[40000];
+  Addr receiver_addr("192.168.0.100", 5678);
+  std::cout << _S_Signature << "\n";
 
   while(true)
   {
     scanf(" %[^\n]s", buf);
-    s.chat_msg(receiver_addr, buf);
+    s.chat_msg(receiver_addr, ChatMessage_View { buf });
   }
 
-  WSACleanup();
   return 0;
 }

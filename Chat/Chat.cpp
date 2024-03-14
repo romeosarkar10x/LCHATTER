@@ -1,8 +1,8 @@
 #include <vector>
 // #include <set>
-#include "Message.cpp"
+#include "ChatMessage.cpp"
 
 class Chat
 {
-  std::vector<Message> _m_messages;
+  std::vector<ChatMessage> _m_messages;
 };

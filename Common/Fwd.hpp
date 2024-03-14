@@ -2,6 +2,6 @@
 #define FORWARD_DECLARATION_HPP
 
 class UdpReceiver;
-
+class UdpSender;
 
 #endif

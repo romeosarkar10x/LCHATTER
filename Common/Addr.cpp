@@ -5,33 +5,24 @@
 #include <string>
 #include <winsock2.h>
 #include <cassert>
+#include "../Other/Socket/Addr_Base.cpp"
 
 #include "Fwd.hpp"
 
-class Addr
+class Addr : public Addr_Base
 {
-  SOCKADDR_IN _m_socket_addr;
-  friend class UdpSender; 
-  friend class UdpReceiver; 
   Addr() = default;
+  friend UdpSender;
+  friend UdpReceiver;
 
 public:
   
-  Addr(const char* ipv4_address, u_short port)
-  {
-    _m_socket_addr.sin_family = AF_INET;
-    _m_socket_addr.sin_port = htons(port);
-    _m_socket_addr.sin_addr.s_addr = inet_addr(ipv4_address);
-  }
+  Addr(const char* ip_address, u_short port) : Addr_Base(ip_address, port) {}
 
-  std::string ipv4_address()
-  {
-    char* p = inet_ntoa(_m_socket_addr.sin_addr);
-    assert(p != nullptr);
-    return p;
-  }
-
-  u_short port() { return ntohs(_m_socket_addr.sin_port); }
+  using Addr_Base::ip_address;
+  using Addr_Base::port;
+  using Addr_Base::to_string;
 };
+
 
 #endif

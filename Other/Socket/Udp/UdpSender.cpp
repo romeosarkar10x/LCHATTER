@@ -1,60 +1,59 @@
-#include "../../../Common/Addr.cpp"
-#include "UdpMsg/UdpMsg.cpp"
-#include <cassert>
-#include <cstring>
+#ifndef UDP_SENDER_CPP
+#define UDP_SENDER_CPP
 
+#include "Config.hpp"
+#include "UdpMessage/ChatMessage.cpp"
+#include "Udp_Base/UdpSender_Base.cpp"
 
-class UdpSender
+class UdpSender final : private UdpSender_Base
 {
-  Addr _m_address;
-  SOCKET _m_socket;
-
-  void _m_initialize()
-  {
-    _m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-    u_long i_mode = 1;
-    ioctlsocket(_m_socket, FIONBIO, &i_mode);
-
-    _m_address._m_socket_addr.sin_family = AF_INET;
-    _m_address._m_socket_addr.sin_port = 0; /* To let the Windows Sockets DLL select a usable port. */
-    _m_address._m_socket_addr.sin_addr.s_addr = INADDR_ANY;
-
-    int address_length = sizeof(_m_address._m_socket_addr);
-    int ret = bind(_m_socket, reinterpret_cast<SOCKADDR*>(&_m_address._m_socket_addr), address_length);
-    assert(ret != SOCKET_ERROR);
-
-    getsockname(_m_socket, reinterpret_cast<SOCKADDR*>(&_m_address._m_socket_addr), &address_length);
-    std::cout << "😃Sender port: " << _m_address.port() << "\n";
-  }
-
+  static const int _S_Offset = sizeof(_S_Signature);
 public:
-  UdpSender() { _m_initialize(); }
-
-  ~UdpSender() noexcept
+  void init()
   {
-    int ret = closesocket(_m_socket);
-    assert(ret != SOCKET_ERROR);
+    UdpSender_Base::init();
+    std::memcpy(buffer(), _S_Signature, _S_Signature_Length); 
   }
 
-  void chat_msg(const Addr& receiver_addr, const char* msg, int msg_len = -1)
+  void conn(const Addr& host);
+  void conn_ack(const Addr& host);
+
+  void ping(const Addr& host);
+
+  void chat_msg(const Addr& receiver, const ChatMessage& msg)
   {
-    if(msg_len == -1) { msg_len = std::strlen(msg); }
+    reset_offset();
+    _m_write_signature();
+    _m_write_msg_type(msg.type());
     
-    int ret = sendto(_m_socket, msg, msg_len, 0, reinterpret_cast<const SOCKADDR*>(&receiver_addr._m_socket_addr), sizeof(receiver_addr._m_socket_addr));
-    std::cout << WSAGetLastError() << "\n";
-    assert(ret != SOCKET_ERROR);
+    std::memcpy(static_cast<char*>(buffer()) + get_offset(), msg.buffer(), msg.length());
+    increment_offset(msg.length());
+    send(receiver);
   }
 
-  void ping(const Addr& receiver_addr);
-  void conn(const Addr& receiver_addr);
-  void conn_ack(const Addr& receiver_addr);
+  void chat_msg(const Addr& receiver, const ChatMessage_View& msg)
+  {
+    reset_offset();
+    _m_write_signature();
+    _m_write_msg_type(msg.type());
+    
+    std::memcpy(static_cast<char*>(buffer()) + get_offset(), msg.buffer(), msg.length());
+    increment_offset(msg.length());
+    send(receiver);
+  }
 
-
-  // void ping(const Addr& host);
-  // void send(const Addr& receiver, const Message& message);
-  
-
+  void _m_write_signature()
+  {
+    void* p = reinterpret_cast<char*>(buffer()) + get_offset();
+    memcpy(p, _S_Signature, _S_Signature_Length);
+    increment_offset(_S_Signature_Length);
+  }
+  void _m_write_msg_type(UdpMessage::Type type)
+  {
+    void* p = reinterpret_cast<char*>(buffer()) + get_offset();
+    *reinterpret_cast<UdpMessage*>(p) = type;
+    increment_offset(static_cast<int>(sizeof(UdpMessage::Type)));
+  }
 };
 
-// bool UdpSender::_s_initialized = false;
+#endif

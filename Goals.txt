@@ -1,9 +1,12 @@
 ## Implement a simple chat application that allows chat between two users.
+## File Storage.
 ## Message Delivery Acknowledgement.
 ## Group Chat feature.
 ## Cryptography.
 ## End to End Encryption.
 ## File Transfer + Image Transfer.
-## Service.
+## Voice Chat.
+## Run as background Service.
 ## Screen Sharing.
+## Remote Access. [ Replace TeamViewer ]
 
