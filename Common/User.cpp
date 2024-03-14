@@ -5,17 +5,14 @@
 #include <string>
 #include <cassert>
 
-#include "Md5_Hash.cpp"
+// #include "Md5_Hash.cpp"
 #include "String.cpp"
 
 class User
 {
   bool _m_is_initialized { false };
-  // const char* _m_name;
-  // const char* _m_id;
-  // std::string _m_name;
-  // std::string _m_id;
-  String 
+  String _m_name;
+  String _m_id;
   
 public:
   // User() : _m_name { nullptr }, _m_id { nullptr } {}

@@ -1,3 +1,6 @@
+#ifndef STRING_CPP
+#define STRING_CPP
+
 #include <iostream>
 #include <utility>
 #include <cstring>
@@ -9,24 +12,22 @@ class String
   char* _m_p;
   int _m_length;
 
+  friend String operator+(const char* lhs, const String& rhs);
+
 public:
   String() : _m_p { nullptr }, _m_length { 0 } {}
-  
-  String(const char* s, int length) : _m_p { new char[length + 1] }, _m_length { length + 1 } { std::memcpy(_m_p, s, length + 1); }
 
-  String(const char* s)
-  {
-    _m_length = static_cast<int>(std::strlen(s));
-    _m_p = new char[_m_length + 1];
-    std::memcpy(_m_p, s, _m_length + 1);
-  }
+  String(char*& s, int length) : _m_p { std::exchange(s, nullptr) }, _m_length { length } {}
+  String(char*& s) : String { s, static_cast<int>(std::strlen(s)) } {}
+  
+  String(const char* s, int length) : _m_p { new char[length + 1] }, _m_length { length } { std::memcpy(_m_p, s, length + 1); }
+  String(const char* s) : String { s, static_cast<int>(std::strlen(s)) } {}
 
   String(const String& rhs) : _m_length { rhs._m_length }
   {
     _m_p = new char[_m_length + 1];
     std::memcpy(_m_p, rhs._m_p, _m_length + 1);
   }
-
   String(String&& rhs) : _m_p { std::exchange(rhs._m_p, nullptr) }, _m_length { std::exchange(rhs._m_length, 0) } {}
   
   String& operator=(const String& rhs)
@@ -35,7 +36,6 @@ public:
     std::swap(*this, copy);
     return *this;
   }
-
   String& operator=(String&& rhs) { std::swap(*this, rhs); return *this; }
 
   void swap(String& rhs) noexcept
@@ -92,10 +92,20 @@ public:
 
 String operator+(const char* lhs, const String& rhs)
 {
-  return rhs.operator+(lhs);
+  int lhs_length = static_cast<int>(std::strlen(lhs));
+  int rhs_length = rhs.length();
+  int final_length = lhs_length + rhs_length;
+  char* p = new char[final_length + 1];
+
+  std::memcpy(p, lhs, lhs_length);
+  std::memcpy(p + lhs_length, rhs.buffer(), rhs_length + 1);
+
+  return { p, final_length };
 }
 
 std::ostream& operator<<(std::ostream& __o, const String& string)
 {
   __o << string.ptr(); return __o;
 }
+
+#endif
