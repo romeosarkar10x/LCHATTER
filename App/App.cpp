@@ -1,7 +1,7 @@
 #include <cassert>
 
 #include "../Backend/AppBackend.cpp"
-#include "../Frontend/AppFrontend.cpp"
+// #include "../Frontend/AppFrontend.cpp"
 #include "Event.hpp"
 #include "../Log/Logger.cpp"
 
@@ -23,10 +23,11 @@ public:
   {
     while(true)
     {
-      Event event = AppFrontend::display();
-      handle_event(event);
-      AppBackend::update();
-      Sleep(10);
+      // Event event = AppFrontend::display();
+      // handle_event(event);
+      // AppBackend::update();
+      // Sleep(10);
+      
     }
   }
 
@@ -57,11 +58,8 @@ public:
 
 int main()
 {
-
-
   App::init();
   App::run();
-  
 
   return 0;
 }
