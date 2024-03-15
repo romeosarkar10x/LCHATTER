@@ -8,6 +8,7 @@
 #include "String.cpp"
 #include "Hash/Md5_Digest.cpp"
 #include "Hash/Md5_Hash.cpp"
+#include "../Log/Logger.cpp"
 
 class User
 {
@@ -26,34 +27,37 @@ public:
 
     _m_is_initialized = true;
     _m_name = username;
-    _m_id = { _m_name + psw };
+    _m_id = { Md5_Hash::calculate_digest(_m_name + psw) };
     _m_name = username;
+
+    logger << "_m_name: " << _m_name << "\n";
+    logger << "_m_id: " << _m_id << "\n";
   }
 
   const String& name() const { assert(_m_is_initialized); return _m_name; }
-  const String& id() const { assert(_m_is_initialized); return _m_id.to_string(); } 
+  const String& id() const { assert(_m_is_initialized); return _m_id.to_string(); }
 
-  // static User me()
-  // {
-  //   if(_s_initialized)
-  //   {
-  //     return _s_me;
-  //   }
-
-  //   throw "error: user not initialized";
-  // }
-  // static void initialize(const std::string& username, const std::string& password)
-  // {
-  //   // _s_me.initialize
-  // }
-  // static void initialize_anonymous()
-  // {
+  int serialize(void* buffer) const
+  {
+    assert(_m_is_initialized);
     
-  // }
+    int offset = 0;
+    offset += _m_name.serialize(buffer);
+    offset += _m_id.serialize(reinterpret_cast<char*>(buffer) + offset);
+    return offset;
+  }
 
+  int serialize(void* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+
+  int deserialize(const void* buffer)
+  {
+    int offset = 0;
+
+    offset += _m_name.deserialize(buffer, offset);
+    offset += _m_id.deserialize(buffer, offset);
+
+    return offset;
+  }
 };
-
-// bool User::_s_initialized { false };
-
 
 #endif

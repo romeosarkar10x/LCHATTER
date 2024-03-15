@@ -17,6 +17,20 @@ public:
   enum class State : unsigned char { ON, LOGGED_IN };
 
 private:
+
+  static const int _S_username_psw_buffer_length = 100;
+  static const char* _s_buffer_username;
+  static const char* _s_buffer_psw;
+
+  // static const char* _s_msg_box
+
+  static void _s_init_buffers()
+  {
+    _s_buffer_username = new char[_S_username_psw_buffer_length];
+    _s_buffer_psw = new char[_S_username_psw_buffer_length];
+  }
+
+
   static User _s_me;
   static Event _s_event;
   static State _s_state;
@@ -27,16 +41,19 @@ private:
 
 
 public:
+  static 
   // const char* 
   static const User& me() const { return _s_me; }
   
   static const std::set<Connection>& connections() { return _s_connections; }
 
 
-  static void initialize()
+  static void init()
   {
-    
+    _s_init_buffers();
   }
+
+  
 
   static void update()
   {

@@ -2,7 +2,7 @@
 
 void print_buffer(const void* buffer)
 {
-  std::cout << "buffer: " << reinterpret_cast<const char*>(buffer) << "\n";
+  std::cout << "buffer: [" << reinterpret_cast<const char*>(buffer) << "]";
 }
 
 int main()

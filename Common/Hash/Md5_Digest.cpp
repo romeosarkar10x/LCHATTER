@@ -43,6 +43,8 @@ public:
     std::memcpy(buffer, _m_buffer, 16);
     return 16;
   }
+
+  int serialize(void* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
   
   int deserialize(const void* buffer)
   {
@@ -50,6 +52,8 @@ public:
     _m_is_valid = false;
     return 16;
   }
+
+  int deserialize(const void* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 };
 
 std::ostream& operator<<(std::ostream& __o, const Md5_Digest& digest)

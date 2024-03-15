@@ -9,10 +9,10 @@
 class App
 {
 public:
-  static void initialize()
+  static void init()
   {
-    AppBackend::initialize();
-    AppFrontend::initialize();
+    AppBackend::init();
+    // AppFrontend::init();
     // wprintw(stdscr, "here!!");
 
     // assert(false);
@@ -30,27 +30,27 @@ public:
     }
   }
 
-  static void handle_event(Event event)
-  {
-    if(event == Event::NONE) { return; }
+  // static void handle_event(Event event)
+  // {
+  //   if(event == Event::NONE) { return; }
     
-    switch(event)
-    {
-    case Event::NONE:
-      break;
-    case Event::LOGIN:
-      AppBackend::me() = User(AppFrontend::user_name(), AppFrontend::password());
-      AppBackend::set_state(AppBackend::State::LOGGED_IN);
-      break;
+  //   switch(event)
+  //   {
+  //   case Event::NONE:
+  //     break;
+  //   case Event::LOGIN:
+  //     AppBackend::me() = User(AppFrontend::user_name(), AppFrontend::password());
+  //     AppBackend::set_state(AppBackend::State::LOGGED_IN);
+  //     break;
     
-    case Event::SEND_MSG:
+  //   case Event::SEND_MSG:
       
-      break;
+  //     break;
       
-    }
+  //   }
 
       
-  }
+  // }
 
 
 };
@@ -59,7 +59,7 @@ int main()
 {
 
 
-  App::initialize();
+  App::init();
   App::run();
   
 

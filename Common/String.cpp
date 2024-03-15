@@ -94,12 +94,22 @@ public:
   operator const char*() { return _m_p; }
   operator const void*() { return _m_p; }
   
-  int serialize(void* buffer)
+  int serialize(void* buffer) const
   {
-    std::memcpy("")
+    std::memcpy(buffer, _m_p, _m_length);
     return _m_length + 1;
   }
 
+  int serialize(void* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+
+  int deserialize(const void* buffer)
+  {
+    this->~String();
+    new (this) String(reinterpret_cast<const char*>(buffer));
+    return _m_length + 1;
+  }
+
+  int deserialize(const void* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 };
 
 String operator+(const char* lhs, const String& rhs)

@@ -8,7 +8,7 @@ int main()
   String str { "hola" };
 
   auto digest = Md5_Hash::calculate_digest(str);
-  std::cout << digest.to_string() << "\n";
+  std::cout << digest << "\n";
 
   return 0;
 }

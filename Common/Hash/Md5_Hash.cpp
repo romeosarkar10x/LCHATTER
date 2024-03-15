@@ -107,7 +107,7 @@ public:
     
     u_int* digest_buffer = new u_int[4];
     digest_buffer[0] = a, digest_buffer[1] = b, digest_buffer[2] = c, digest_buffer[3] = d;
-    Md5_Digest digest{ digest_buffer };
+    Md5_Digest digest { digest_buffer };
 
     delete [] reinterpret_cast<char*>(tmp);
     delete [] digest_buffer;
