@@ -19,7 +19,13 @@ class User
 public:
   User() = default;
 
-  User(const char* username, const char* psw) : _m_is_initialized { true }, _m_name { username }, _m_id { Md5_Hash::calculate_digest(_m_name + psw) } {}
+  User(const char* username, const char* psw) :
+  _m_is_initialized { true },
+  _m_name { username },
+  _m_id { Md5_Hash::calculate_digest(_m_name + psw) } {}
+
+  User(const User& rhs) = default;
+  User(User&& rhs) noexcept : _m_is_initialized { _m_is_initialized }, _m_name { std::move(_m_name) }, _m_id { std::move(_m_id) } {}
 
   void init(const char* username, const char* psw)
   {
@@ -28,7 +34,6 @@ public:
     _m_is_initialized = true;
     _m_name = username;
     _m_id = { Md5_Hash::calculate_digest(_m_name + psw) };
-    _m_name = username;
 
     logger << "_m_name: " << _m_name << "\n";
     logger << "_m_id: " << _m_id << "\n";

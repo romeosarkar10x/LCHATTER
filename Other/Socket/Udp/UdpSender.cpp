@@ -20,7 +20,7 @@ public:
 
   void ping(const Addr& host);
 
-  void chat_msg(const Addr& receiver, const ChatMessage& msg)
+  void chat_msg(const Addr& receiver, const UdpChatMessage& msg)
   {
     reset_offset();
     _m_write_signature();

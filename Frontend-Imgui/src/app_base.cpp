@@ -1,5 +1,5 @@
-#ifndef APPBASE_H
-#define APPBASE_H
+#ifndef App_Base_H
+#define App_Base_H
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -26,10 +26,10 @@ void ErrorCallback(int error, const char *description)
 
 
 
-template <typename Derived> class AppBase
+template <typename Derived> class App_Base
 {
 public:
-  AppBase()
+  App_Base()
   {
     glfwSetErrorCallback(ErrorCallback);
 
@@ -116,7 +116,7 @@ public:
     // 18.0f);
   }
 
-  virtual ~AppBase()
+  virtual ~App_Base()
   {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
@@ -529,4 +529,4 @@ private:
   ImVec4 clear_color = ImVec4(0.1058, 0.1137f, 0.1255f, 1.00f);
 };
 
-#endif // APPBASE_H
+#endif // App_Base_H

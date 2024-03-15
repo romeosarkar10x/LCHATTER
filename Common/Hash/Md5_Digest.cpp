@@ -2,6 +2,8 @@
 #define MD5_DIGEST_CPP
 
 #include <iostream>
+#include <cstring>
+#include <utility>
 #include "../String.cpp"
 #include "../Fwd.hpp"
 
@@ -14,6 +16,23 @@ class Md5_Digest
 public:
   Md5_Digest() = default;
   Md5_Digest(const void* buffer) { std::memcpy(_m_buffer, buffer, 16); }
+
+  Md5_Digest(const Md5_Digest& rhs) = default;
+  Md5_Digest(Md5_Digest&& rhs) : _m_string { std::move(_m_string) }, _m_is_valid { rhs._m_is_valid } { std::memcpy(_m_buffer, rhs._m_buffer, 16); }
+  
+  Md5_Digest& operator=(const Md5_Digest& rhs)
+  {
+    std::memcpy(_m_buffer, rhs._m_buffer, 16);
+    // _m_string = rhs._m_string;
+    // _m_string
+
+    return *this;
+  }
+
+  Md5_Digest& operator=(Md5_Digest&& rhs)
+  {
+    return *this;
+  }
 
   const String& to_string() const
   {

@@ -44,17 +44,25 @@ private:
 
   static void _s_handle_event()
   {
-    // if(_s_event == Event::NONE) { return; }
-
     switch(_s_event)
     {
     case Event::LOGIN:
       _s_login();
+      _s_state = State::LOGGED_IN;
       break;
     case Event::LOGIN_ANONYMOUS:
       _s_login_anonymous();
+      _s_state = State::LOGGED_IN;
       break;
-    // case Event::SEND_CONN:
+    case Event::CONNECT:
+      break;
+    case Event::CONNECT_ACCEPT:
+      break;
+    case Event::CONNECT_REJECT:
+      break;
+    case Event::MESSAGE:
+      break;
+
     default:
       break;
     }
@@ -67,9 +75,11 @@ private:
   static void _s_login_anonymous()
   {
     std::memcpy(_s_buffer_username, "ANONYMOUS", 10);
-    
+    /* need to generate an unique password */
     _s_login();
   }
+
+  static void _s_connect() {}
 
 public:
   

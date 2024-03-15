@@ -42,5 +42,5 @@ public:
 
 
 
-Logger logger("Logger.txt");
+Logger logger("App.log");
 #endif

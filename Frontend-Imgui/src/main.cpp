@@ -1,8 +1,8 @@
-#include "chat.cpp"
+#include "App.cpp"
 
 int main()
 {
-  Chat chatApp;
+  App chatApp;
   chatApp.Run();
   return 0;
 }

@@ -9,13 +9,13 @@
 
 class String
 {
-  char* _m_p;
-  int _m_length;
+  char* _m_p { nullptr };
+  int _m_length { 0 };
 
   friend String operator+(const char* lhs, const String& rhs);
 
 public:
-  String() : _m_p { nullptr }, _m_length { 0 } {}
+  String() = default;
 
   String(char*& s, int length) : _m_p { std::exchange(s, nullptr) }, _m_length { length } {}
   String(char*& s) : String { s, static_cast<int>(std::strlen(s)) } {}
@@ -27,10 +27,13 @@ public:
 
   String(const String& rhs) : _m_length { rhs._m_length }
   {
-    _m_p = new char[_m_length + 1];
-    std::memcpy(_m_p, rhs._m_p, _m_length + 1);
+    if(_m_p != nullptr)
+    {
+      _m_p = new char[_m_length + 1];
+      std::memcpy(_m_p, rhs._m_p, _m_length + 1);
+    }
   }
-  String(String&& rhs) : _m_p { std::exchange(rhs._m_p, nullptr) }, _m_length { std::exchange(rhs._m_length, 0) } {}
+  String(String&& rhs) noexcept : _m_p { std::exchange(rhs._m_p, nullptr) }, _m_length { std::exchange(rhs._m_length, 0) } {}
 
   ~String()
   {
@@ -87,12 +90,12 @@ public:
     return s;
   }
 
-  const void* buffer() const { return _m_p; }
-  const char* ptr() const { return _m_p; }
-  int length() const { return _m_length; }
+  const void* buffer() const noexcept { return _m_p; }
+  const char* ptr() const noexcept { return _m_p; }
+  int length() const noexcept { return _m_length; }
 
-  operator const char*() { return _m_p; }
-  operator const void*() { return _m_p; }
+  operator const char*() const noexcept { return _m_p; }
+  operator const void*() const noexcept { return _m_p; }
   
   int serialize(void* buffer) const
   {

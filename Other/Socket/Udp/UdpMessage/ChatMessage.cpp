@@ -3,15 +3,15 @@
 // #include "../../../../Common/User.cpp"
 #include "UdpMessage.cpp"
 
-class ChatMessage : public UdpMessage
+class UdpChatMessage : public UdpMessage
 {
   std::string _m_msg;
 
 public:
-  ChatMessage(const char* msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { msg } {}
-  ChatMessage(const std::string& msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { msg } {}
-  ChatMessage(std::string&& msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { std::move(msg) } {}
-  ~ChatMessage() = default;
+  UdpChatMessage(const char* msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { msg } {}
+  UdpChatMessage(const std::string& msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { msg } {}
+  UdpChatMessage(std::string&& msg) : UdpMessage { UdpMessage::Type::CHAT_MSG }, _m_msg { std::move(msg) } {}
+  ~UdpChatMessage() = default;
   
   const std::string& msg() const { return _m_msg; }
   int length() const { return static_cast<int>(_m_msg.length()); }

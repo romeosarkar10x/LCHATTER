@@ -1,3 +1,6 @@
+#ifndef TIME_POINT_CPP
+#define TIME_POINT_CPP
+
 #include <iostream>
 #include <windows.h>
 
@@ -20,6 +23,8 @@ public:
   }
   
   void refresh() { GetSystemTimeAsFileTime(reinterpret_cast<FILETIME*>(&_m_timepoint)); }
+
+  bool operator<(const TimePoint& rhs) const { return _m_timepoint < rhs._m_timepoint; }
 };
 
 // std::ostream& operator<<(std::ostream& __o, const TimePoint& __tp)
@@ -28,4 +33,4 @@ public:
 //   return __o;
 // }
 
-
+#endif
