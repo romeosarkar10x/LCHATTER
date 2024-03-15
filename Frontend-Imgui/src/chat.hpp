@@ -41,9 +41,11 @@ private:
   void SendMessage(const char *message);
   void LoginWindow();
   void ChatWindow();
+
   std::vector<Conversation> conversations;
   int selectedConversationIndex = -1;
   ImFont *headingFont, *normalFont;
+  ImGuiWindowFlags mainWindowFlag;
 };
 
 #endif // CHAT_H

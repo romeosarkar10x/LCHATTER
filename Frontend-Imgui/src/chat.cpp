@@ -32,14 +32,50 @@ std::vector<Conversation> generateDummyData()
   return conversations;
 }
 
-void CenterText(const char *text, float y_padding = 0.0f, ImColor color = ImColor(255, 255, 255))
+void TextWithAlignment(const char *text, ImVec2 alignment = ImVec2(0, 0), float y_padding = 0.0f,
+                       ImColor color = ImColor(255, 255, 255))
 {
+  /*
+   */
+  ImVec2 padding = ImGui::GetStyle().WindowPadding;
+  ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
+
+  // Calculate the size without padding and item spacing
+  ImVec2 windowSize = ImGui::GetContentRegionAvail();
+  // std::cout << text << std::endl;
+  // std::cout << windowSize.x << " " << windowSize.y << std::endl;
+  // windowSize.x -= (padding.x);                 // Subtract padding from both sides
+  // windowSize.y -= (padding.y * 2) + itemSpacing.y; // Subtract padding from top and bottom and item spacing
   const ImVec2 text_size = ImGui::CalcTextSize(text);
   float textHeight = ImGui::GetTextLineHeightWithSpacing();
 
-  ImVec2 windowSize = ImGui::GetContentRegionAvail();
-  ImGui::SameLine((windowSize.x / 2) - (text_size.x / 2));
-  ImGui::SetCursorPosY((ImGui::GetCursorPosY() + windowSize.y) / 2 - textHeight);
+  // ImVec2 windowSize = ImGui::GetContentRegionAvail();
+
+  if (alignment.x == 0) // Left aligned
+  {
+    // Do nothing
+  }
+  else if (alignment.x == 1) // Center aligned
+  {
+    ImGui::SameLine((windowSize.x / 2) - (text_size.x / 2));
+  }
+  else if (alignment.x == 2) // Right aligned
+  {
+    ImGui::SameLine(windowSize.x - text_size.x);
+  }
+
+  if (alignment.y == 0) // Top aligned
+  {
+    // Do nothing
+  }
+  else if (alignment.y == 1) // Center aligned
+  {
+    ImGui::SetCursorPosY((ImGui::GetCursorPosY() + windowSize.y) / 2 - textHeight);
+  }
+  else if (alignment.y == 2) // Bottom aligned
+  {
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + windowSize.y - textHeight);
+  }
 
   if (y_padding > 0.0f)
   {
@@ -67,6 +103,16 @@ void Chat::StartUp()
 
 void Chat::Update()
 {
+  mainWindowFlag = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+
+  // Turn off padding for the child window
+  // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+  // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
   if (!isLoggedIn)
   {
     LoginWindow();
@@ -75,6 +121,10 @@ void Chat::Update()
   {
     ChatWindow();
   }
+
+  // Don't forget to pop the style variable to reset the padding back to default for subsequent windows
+  // ImGui::PopStyleVar(2);
+
   // ImGui::ShowDemoWindow();
 }
 
@@ -122,68 +172,47 @@ void Chat::SendMessage(const char *message)
 
 void Chat::LoginWindow()
 {
-  static ImGuiWindowFlags flags =
-      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
-
-  // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
-  const ImGuiViewport *viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->WorkPos);
-  ImGui::SetNextWindowSize(viewport->WorkSize);
-  ImGui::Begin("Main", nullptr, flags);
-
-  // Set the window size first if you want to specify the size
-  // ImVec2 windowSize = ImVec2(400, 300); // Example specific size
-  ImVec2 windowSize = ImGui::GetContentRegionAvail(); // For full display size
-  ImVec2 childWindowSize = {450, 220};
-  ImVec2 windowPos = ImVec2((windowSize.x - childWindowSize.x) / 2, (windowSize.y - childWindowSize.y) / 2);
-
-  // ImGui::SetNextChildWindowPos(windowPos, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-  ImGui::SetCursorPos(windowPos);
-
-  // Using the flags variable which should be defined earlier in your code
-  // with ImGuiWindowFlags_AlwaysAutoResize if you want the window to automatically resize based on its contents
-  ImGui::BeginChild("MainKaChild", childWindowSize);
+  if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
-    static char username[128] = "";
-    static char password[128] = "";
+    ImVec2 windowSize = ImGui::GetContentRegionAvail();
+    ImVec2 childWindowSize = ImVec2(400, 220);
 
-    ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
-    ImGui::InputText("Password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
+    ImGui::SetCursorPos(ImVec2((windowSize.x - childWindowSize.x) / 2, (windowSize.y - childWindowSize.y) / 2));
 
-    if (ImGui::Button("Log In"))
+    // Login Child Window
     {
-      isLoggedIn = true;
+      ImGui::BeginChild("LogInWindow", childWindowSize);
+      static char username[128] = "";
+      static char password[128] = "";
+
+      ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
+      ImGui::InputText("Password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
+
+      if (ImGui::Button("Log In"))
+      {
+        isLoggedIn = true;
+      }
+      if (ImGui::Button("Log in anonymous user"))
+      {
+        isLoggedIn = true;
+      }
     }
-    if (ImGui::Button("Log in anonymous user"))
-    {
-      isLoggedIn = true;
-    }
+    ImGui::EndChild();
   }
-
-  ImGui::EndChild();
   ImGui::End();
 }
 
 void Chat::ChatWindow()
 {
-  static ImGuiWindowFlags flags =
-      ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
-
-  // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
-  const ImGuiViewport *viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->WorkPos);
-  ImGui::SetNextWindowSize(viewport->WorkSize);
-
-  if (ImGui::Begin("MainWindow", nullptr, flags))
+  if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
-    // Calculate the widths based on the percentage of the available space
-    float availableWidth = ImGui::GetContentRegionAvail().x;
-    float leftWidth = availableWidth * 0.3f;  // 30% for contacts
-    float rightWidth = availableWidth * 0.7f; // 70% for chats
+    ImVec2 windowSize = ImGui::GetContentRegionAvail();
+    float leftWidth = windowSize.x * 0.3f;  // 30% for contacts
+    float rightWidth = windowSize.x * 0.7f; // 70% for chats
 
     // Left
     {
-      ImGui::BeginChild("Contacts", ImVec2(leftWidth, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+      ImGui::BeginChild("Contacts", ImVec2(leftWidth, windowSize.y));
       for (int i = 0; i < static_cast<int>(conversations.size()); ++i)
       {
         if (ImGui::Selectable(conversations[i].contactName.c_str(), i == selectedConversationIndex))
@@ -198,10 +227,10 @@ void Chat::ChatWindow()
     // Right
     {
       ImGui::BeginGroup();
-      ImGui::BeginChild("Conversation&Details", ImVec2(rightWidth, -ImGui::GetFrameHeightWithSpacing()));
+      ImGui::BeginChild("Conversation&Details", ImVec2(rightWidth, windowSize.y));
       if (selectedConversationIndex == -1)
       {
-        CenterText("Select a chat to start messaging");
+        TextWithAlignment("Select a chat to start messaging", ImVec2(1, 1));
       }
       else
       {
@@ -218,12 +247,18 @@ void Chat::ChatWindow()
           {
             for (const Message &msg : selectedConvo.messages)
             {
-              ImGui::Text("%s:", msg.sender.c_str());
-              ImGui::SameLine();
-              ImGui::Text(msg.content.c_str());
+              if (msg.sender == "You")
+              {
+                TextWithAlignment(msg.content.c_str(), ImVec2(2, 0));
+              }
+              else
+              {
+                TextWithAlignment(msg.content.c_str());
+              }
             }
 
             ImGui::EndTabItem();
+            /*
             ImGui::Separator();
             static char messageBuffer[10000] = "";
             bool reclaim_focus = false;
@@ -248,6 +283,7 @@ void Chat::ChatWindow()
 
             // Adjust the size of the Send button
             ImGui::Button("Send", ImVec2(0, ImGui::GetTextLineHeight()));
+            */
           }
           if (ImGui::BeginTabItem("Details"))
           {
