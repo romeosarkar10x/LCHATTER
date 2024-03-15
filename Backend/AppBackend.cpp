@@ -42,11 +42,34 @@ private:
 
   static std::set<Connection> _s_connections;
 
-  void _s_handle_event()
+  static void _s_handle_event()
   {
+    // if(_s_event == Event::NONE) { return; }
 
+    switch(_s_event)
+    {
+    case Event::LOGIN:
+      _s_login();
+      break;
+    case Event::LOGIN_ANONYMOUS:
+      _s_login_anonymous();
+      break;
+    // case Event::SEND_CONN:
+    default:
+      break;
+    }
+
+    _s_event = Event::NONE;
   }
 
+  static void _s_login() { _s_me.init(_s_buffer_username, _s_buffer_psw); }
+  
+  static void _s_login_anonymous()
+  {
+    std::memcpy(_s_buffer_username, "ANONYMOUS", 10);
+    
+    _s_login();
+  }
 
 public:
   
