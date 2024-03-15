@@ -11,3 +11,9 @@
 *.vscode/
 
 *.log
+
+*.o
+*.d
+*.rough
+
+*.ini
