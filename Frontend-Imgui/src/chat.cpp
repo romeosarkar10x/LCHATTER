@@ -9,6 +9,7 @@
 
 #include "app_base.cpp"
 
+// /*
 // Structure for a single message
 struct Message
 {
@@ -23,7 +24,7 @@ struct Conversation
   std::string contactName; // Or contact ID if you have one
   std::vector<Message> messages;
 };
-
+// */
 class Chat : public AppBase<Chat>
 {
 public:
@@ -41,16 +42,16 @@ private:
   void SendMessage(const char *message);
   void LoginWindow();
   void ChatWindow();
+  void AddConnectionWindow();
 
   std::vector<Conversation> conversations;
   int selectedConversationIndex = -1;
-  ImFont *headingFont, *normalFont;
+  ImFont *h1Font, *h2Font;
   ImGuiWindowFlags mainWindowFlag;
 };
 
-#endif // CHAT_H
-
-int isLoggedIn = false;
+// /*
+int isLoggedIn = false, showAddConnectionForm = false;
 std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
 
 // Generates 20 dummy contacts and conversations
@@ -66,7 +67,7 @@ std::vector<Conversation> generateDummyData()
     conv.contactName = contactNames[i];
 
     // Generate some random messages
-    int numMessages = rng() % 5 + 2; // Between 2 to 7 messages
+    int numMessages = rng() % 20 + 2; // Between 2 to 7 messages
     for (int j = 0; j < numMessages; ++j)
     {
       Message msg;
@@ -81,12 +82,11 @@ std::vector<Conversation> generateDummyData()
 
   return conversations;
 }
+// */
 
 void TextWithAlignment(const char *text, ImVec2 alignment = ImVec2(0, 0), float y_padding = 0.0f,
                        ImColor color = ImColor(255, 255, 255))
 {
-  /*
-   */
   ImVec2 padding = ImGui::GetStyle().WindowPadding;
   ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 
@@ -143,7 +143,8 @@ void Chat::StartUp()
   // Load a new font
   ImGuiIO &io = ImGui::GetIO();
   io.Fonts->AddFontFromFileTTF("assets/fonts/CascadiaCode/CaskaydiaCoveNerdFont-Regular.ttf", 24.0f);
-  headingFont = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 48.0f);
+  h1Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 48.0f);
+  h2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 32.0f);
 
   // Adjust ImGui style parameters
   // ImGuiStyle &style = ImGui::GetStyle();
@@ -232,6 +233,11 @@ void Chat::LoginWindow()
     // Login Child Window
     {
       ImGui::BeginChild("LogInWindow", childWindowSize);
+
+      // ImGui::InputText("Username", AppBackend::buffer_username(), AppBackend::buffer_username_length);
+      // ImGui::InputText("Password", AppBackend::buffer_psw(), AppBackend::buffer_psw_length,
+      //                  ImGuiInputTextFlags_Password);
+
       static char username[128] = "";
       static char password[128] = "";
 
@@ -241,17 +247,47 @@ void Chat::LoginWindow()
       if (ImGui::Button("Log In"))
       {
         isLoggedIn = true;
+        // AppBackend::set_event(Event::LOGIN);
       }
       if (ImGui::Button("Log in anonymous user"))
       {
         isLoggedIn = true;
+        // AppBackend::set_event(Event::LOGIN_ANONYMOUS);
       }
     }
     ImGui::EndChild();
   }
   ImGui::End();
 }
+void Chat::AddConnectionWindow()
+{
+  // if (ImGui::Begin("AddConnectionWindow", nullptr, mainWindowFlag))
+  // {
+  //   ImVec2 windowSize = ImGui::GetContentRegionAvail();
+  //   ImVec2 childWindowSize = ImVec2(400, 220);
 
+  //   ImGui::SetCursorPos(ImVec2((windowSize.x - childWindowSize.x) / 2, (windowSize.y - childWindowSize.y) / 2));
+
+  //   // Login Child Window
+  //   {
+  //     ImGui::BeginChild("Child", childWindowSize);
+
+  static char IP[128] = "";
+  static char PORT[128] = "";
+
+  ImGui::InputText("IP Addr", IP, IM_ARRAYSIZE(IP));
+  ImGui::InputText("PORT", PORT, IM_ARRAYSIZE(PORT));
+
+  if (ImGui::Button("Add"))
+  {
+    showAddConnectionForm = false;
+    // isLoggedIn = true;
+  }
+  //   }
+  //   ImGui::EndChild();
+  // }
+  // ImGui::End();
+}
 void Chat::ChatWindow()
 {
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
@@ -262,7 +298,33 @@ void Chat::ChatWindow()
 
     // Left
     {
-      ImGui::BeginChild("Contacts", ImVec2(leftWidth, windowSize.y));
+      ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y));
+
+      ImGui::Text("username");
+      if (ImGui::Button("Add New Connection"))
+      {
+        showAddConnectionForm = !showAddConnectionForm;
+      }
+      if (showAddConnectionForm)
+      {
+        AddConnectionWindow();
+      }
+      ImGui::Separator();
+      ImGui::PushFont(h2Font);
+      ImGui::Text("Connections");
+      ImGui::PopFont();
+      ImGui::Separator();
+      /*
+        int i = 0;
+        for (auto &connection : AppBackend::connections())
+        {
+          if (ImGui::Selectable(connection.user().name(), i == selectedConversationIndex))
+          {
+            selectedConversationIndex = i;
+          }
+          i++;
+        }
+      */
       for (int i = 0; i < static_cast<int>(conversations.size()); ++i)
       {
         if (ImGui::Selectable(conversations[i].contactName.c_str(), i == selectedConversationIndex))
@@ -276,8 +338,8 @@ void Chat::ChatWindow()
 
     // Right
     {
-      ImGui::BeginGroup();
-      ImGui::BeginChild("Conversation&Details", ImVec2(rightWidth, windowSize.y));
+      // ImGui::BeginGroup();
+      ImGui::BeginChild("RightParent", ImVec2(rightWidth, windowSize.y));
       if (selectedConversationIndex == -1)
       {
         TextWithAlignment("Select a chat to start messaging", ImVec2(1, 1));
@@ -286,7 +348,7 @@ void Chat::ChatWindow()
       {
         const Conversation &selectedConvo = conversations[selectedConversationIndex];
 
-        ImGui::PushFont(headingFont);
+        ImGui::PushFont(h1Font);
         ImGui::Text("%s", selectedConvo.contactName.c_str());
         ImGui::PopFont();
 
@@ -297,43 +359,9 @@ void Chat::ChatWindow()
           {
             for (const Message &msg : selectedConvo.messages)
             {
-              if (msg.sender == "You")
-              {
-                TextWithAlignment(msg.content.c_str(), ImVec2(2, 0));
-              }
-              else
-              {
-                TextWithAlignment(msg.content.c_str());
-              }
+              ImGui::Text(msg.content.c_str());
             }
-
             ImGui::EndTabItem();
-            /*
-            ImGui::Separator();
-            static char messageBuffer[10000] = "";
-            bool reclaim_focus = false;
-            ImGuiInputTextFlags input_text_flags =
-                ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
-                ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
-            // Used "##messageInputBox" to hide the label but ensure a unique ID
-            if (ImGui::InputText(
-                    "##messageInputBox", messageBuffer, IM_ARRAYSIZE(messageBuffer), input_text_flags,
-                    [](ImGuiInputTextCallbackData *data) -> int { return 0; }, (void *)this))
-            {
-              reclaim_focus = true;
-            }
-
-            // Auto-focus on window apparition
-            ImGui::SetItemDefaultFocus();
-            if (reclaim_focus)
-            {
-              ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-            }
-            ImGui::SameLine();
-
-            // Adjust the size of the Send button
-            ImGui::Button("Send", ImVec2(0, ImGui::GetTextLineHeight()));
-            */
           }
           if (ImGui::BeginTabItem("Details"))
           {
@@ -342,10 +370,41 @@ void Chat::ChatWindow()
           }
           ImGui::EndTabBar();
         }
+        // /*
+        // ImVec2 windowSize = ImGui::GetContentRegionAvail();
+        // ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 300);
+        ImGui::Separator();
+
+        static char messageBuffer[10000] = "";
+        bool reclaim_focus = false;
+        ImGuiInputTextFlags input_text_flags =
+            ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
+            ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
+        // Used "##messageInputBox" to hide the label but ensure a unique ID
+        if (ImGui::InputText(
+                "##messageInputBox", messageBuffer, IM_ARRAYSIZE(messageBuffer), input_text_flags,
+                [](ImGuiInputTextCallbackData *data) -> int { return 0; }, (void *)this))
+        {
+          reclaim_focus = true;
+        }
+
+        // Auto-focus on window apparition
+        ImGui::SetItemDefaultFocus();
+        if (reclaim_focus)
+        {
+          ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+        }
+        ImGui::SameLine();
+
+        // Adjust the size of the Send button
+        ImGui::Button("Send");
+        // */
       }
       ImGui::EndChild();
-      ImGui::EndGroup();
+      // ImGui::EndGroup();
     }
   }
   ImGui::End();
 }
+
+#endif // CHAT_H
