@@ -23,20 +23,32 @@ public:
   String(const char* s, int length) : _m_p { new char[length + 1] }, _m_length { length } { std::memcpy(_m_p, s, length + 1); }
   String(const char* s) : String { s, static_cast<int>(std::strlen(s)) } {}
 
+  String(const std::string& rhs) : String { rhs.c_str(), static_cast<int>(rhs.length()) } {}
+
   String(const String& rhs) : _m_length { rhs._m_length }
   {
     _m_p = new char[_m_length + 1];
     std::memcpy(_m_p, rhs._m_p, _m_length + 1);
   }
   String(String&& rhs) : _m_p { std::exchange(rhs._m_p, nullptr) }, _m_length { std::exchange(rhs._m_length, 0) } {}
+
+  ~String()
+  {
+    if(_m_p != nullptr)
+    {
+      delete [] _m_p;
+      _m_p = nullptr;
+      _m_length = 0;
+    }
+  }
   
   String& operator=(const String& rhs)
   {
     String copy = rhs;
-    std::swap(*this, copy);
+    swap(copy);
     return *this;
   }
-  String& operator=(String&& rhs) { std::swap(*this, rhs); return *this; }
+  String& operator=(String&& rhs) { swap(rhs); return *this; }
 
   void swap(String& rhs) noexcept
   {
@@ -79,15 +91,15 @@ public:
   const char* ptr() const { return _m_p; }
   int length() const { return _m_length; }
 
-  ~String()
+  operator const char*() { return _m_p; }
+  operator const void*() { return _m_p; }
+  
+  int serialize(void* buffer)
   {
-    if(_m_p != nullptr)
-    {
-      delete [] _m_p;
-      _m_p = nullptr;
-      _m_length = 0;
-    }
+    std::memcpy("")
+    return _m_length + 1;
   }
+
 };
 
 String operator+(const char* lhs, const String& rhs)

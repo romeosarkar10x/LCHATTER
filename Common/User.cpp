@@ -5,34 +5,33 @@
 #include <string>
 #include <cassert>
 
-// #include "Md5_Hash.cpp"
 #include "String.cpp"
+#include "Hash/Md5_Digest.cpp"
+#include "Hash/Md5_Hash.cpp"
 
 class User
 {
   bool _m_is_initialized { false };
   String _m_name;
-  String _m_id;
+  Md5_Digest _m_id;
   
 public:
-  // User() : _m_name { nullptr }, _m_id { nullptr } {}
   User() = default;
-  User(const char* username, const char* psw) : _m_is_initialized { true }
-  {
-    std::strlen(username);
-  }
+
+  User(const char* username, const char* psw) : _m_is_initialized { true }, _m_name { username }, _m_id { Md5_Hash::calculate_digest(_m_name + psw) } {}
 
   void init(const char* username, const char* psw)
   {
     assert(!_m_is_initialized);
 
     _m_is_initialized = true;
-    _m_name = std::string(username);
-    // _m_id = 
+    _m_name = username;
+    _m_id = { _m_name + psw };
+    _m_name = username;
   }
 
-  const std::string& name() const { assert(_m_is_initialized); return _m_name; }
-  const std::string& id() const { assert(_m_is_initialized); return _m_id; } 
+  const String& name() const { assert(_m_is_initialized); return _m_name; }
+  const String& id() const { assert(_m_is_initialized); return _m_id.to_string(); } 
 
   // static User me()
   // {
