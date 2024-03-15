@@ -20,7 +20,6 @@ public:
   _m_sender { sender },
   _m_message { message },
   _m_timepoint { timepoint } {}
-  
 
   const User& sender() const { return _m_sender; }
   const String& message() const { return _m_message; }

@@ -14,13 +14,22 @@
 class AppBackend
 {
 public:
-  enum class State : unsigned char { NOT_LOGGED_IN, LOGGED_IN };
+  enum class State : unsigned char
+  {
+    NOT_LOGGED_IN,
+    LOGGED_IN
+  };
 
 private:
 
   static const int _S_username_psw_buffer_length = 100;
   static char* _s_buffer_username;
   static char* _s_buffer_psw;
+
+  static const int _S_ip_address_buffer_length = 20;
+  static char* _s_buffer_ip_address;
+  static const int _S_port_buffer_length = 10;
+  static char* _s_buffer_port;
 
   static const int _S_message_buffer_length = 40000;
   static char* _s_buffer_message;
@@ -30,13 +39,18 @@ private:
     _s_buffer_username = new char[_S_username_psw_buffer_length];
     _s_buffer_psw = new char[_S_username_psw_buffer_length];
 
+    _s_buffer_ip_address = new char[_S_ip_address_buffer_length];
+    _s_buffer_port = new char[_S_port_buffer_length];
+
     _s_buffer_message = new char[_S_message_buffer_length];
   }
 
   static Event _s_event;
+
   static State _s_state;
 
   static User _s_me;
+
   static UdpSender _s_sender;
   static UdpReceiver _s_receiver;
 
@@ -90,11 +104,17 @@ public:
   static char* buffer_username() { return _s_buffer_username; }
   static char* buffer_psw() { return _s_buffer_psw; }
 
+  static char* buffer_ip_address() { return _s_buffer_ip_address; }
+  static char* buffer_port() { return _s_buffer_port; }
+
   static char* buffer_message() { return _s_buffer_message; }
 
   static const int buffer_username_length = _S_username_psw_buffer_length;
   static const int buffer_psw_length = _S_username_psw_buffer_length;
-  
+
+  static const int buffer_ip_address_length = _S_ip_address_buffer_length;
+  static const int buffer_port_length = _S_port_buffer_length;
+
   static const int buffer_message_length = _S_message_buffer_length;
 
 
@@ -119,10 +139,22 @@ public:
 
 };
 
+char* AppBackend::_s_buffer_username;
+char* AppBackend::_s_buffer_psw;
+
+char* AppBackend::_s_buffer_ip_address;
+char* AppBackend::_s_buffer_port;
+
+char* AppBackend::_s_buffer_message;
+
+Event AppBackend::_s_event { Event::NONE };
+
+AppBackend::State AppBackend::_s_state { AppBackend::State::NOT_LOGGED_IN };
+
 User AppBackend::_s_me {};
+
 UdpSender AppBackend::_s_sender {};
 UdpReceiver AppBackend::_s_receiver {};
-AppBackend::State AppBackend::_s_state { AppBackend::State::NOT_LOGGED_IN };
 
 std::set<Connection> AppBackend::_s_connections {};
 
