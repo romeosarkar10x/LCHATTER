@@ -70,7 +70,7 @@ ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
 	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32 "C:\Windows\System32\ws2_32.dll"
 
-	CXXFLAGS += `pkg-config --cflags glfw3`
+# CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
 endif
 

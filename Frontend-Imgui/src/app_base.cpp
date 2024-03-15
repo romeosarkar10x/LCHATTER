@@ -73,8 +73,8 @@ public:
     ImGuiStyle &style = ImGui::GetStyle();
     ImVec4 *colors = style.Colors;
 
-    // SetTheme(colors, "dracula");
-    SetTheme(colors, "neon");
+    SetTheme(colors, "dracula");
+    // SetTheme(colors, "neon");
     // SetTheme(colors, "monokai");
     // SetTheme(colors, "cyberpunk");
     // SetTheme(colors, "node");
