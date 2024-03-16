@@ -1,5 +1,5 @@
-#ifndef UDP_CONFIG_CPP
-#define UDP_CONFIG_CPP
+#ifndef APP_CONFIG_CPP
+#define APP_CONFIG_CPP
 
 #include <cstring>
 

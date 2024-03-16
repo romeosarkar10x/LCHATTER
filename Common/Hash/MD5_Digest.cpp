@@ -7,38 +7,49 @@
 #include "../String.cpp"
 #include "../Fwd.hpp"
 
-class Md5_Digest
+
+class MD5_Digest
 {
   u_char _m_buffer[16];
+  
   String _m_string;
   bool _m_is_valid { false };
 
 public:
-  Md5_Digest() = default;
-  Md5_Digest(const void* buffer) { std::memcpy(_m_buffer, buffer, 16); }
+  MD5_Digest() = default;
+  MD5_Digest(const void* buffer) { std::memcpy(_m_buffer, buffer, sizeof(_m_buffer)); }
 
-  Md5_Digest(const Md5_Digest& rhs) = default;
-  Md5_Digest(Md5_Digest&& rhs) : _m_string { std::move(_m_string) }, _m_is_valid { rhs._m_is_valid } { std::memcpy(_m_buffer, rhs._m_buffer, 16); }
+  MD5_Digest(const MD5_Digest& rhs) = default;
+  MD5_Digest(MD5_Digest&& rhs) :
+  _m_string { std::move(rhs._m_string) },
+  _m_is_valid { rhs._m_is_valid } { std::memcpy(_m_buffer, rhs._m_buffer, sizeof(_m_buffer)); }
   
-  Md5_Digest& operator=(const Md5_Digest& rhs)
+  void swap(MD5_Digest& rhs) noexcept
   {
-    std::memcpy(_m_buffer, rhs._m_buffer, 16);
-    // _m_string = rhs._m_string;
-    // _m_string
+    std::swap(_m_buffer, rhs._m_buffer);
+    _m_string.swap(rhs._m_string);
+    std::swap(_m_is_valid, rhs._m_is_valid);
+  }
 
+  MD5_Digest& operator=(const MD5_Digest& rhs)
+  {
+    MD5_Digest copy = rhs;
+    swap(copy);
     return *this;
   }
 
-  Md5_Digest& operator=(Md5_Digest&& rhs)
+  MD5_Digest& operator=(MD5_Digest&& rhs)
   {
+    swap(rhs);
     return *this;
   }
 
   const String& to_string() const
   {
     if(_m_is_valid) { return _m_string; }
+    
     char* s = new char[33]; int i = 0;
-  
+    
     auto hexadecimal_digit = [] (char value) -> char
     {
       if(value < static_cast<char>(10)) { return value + '0'; }
@@ -53,8 +64,11 @@ public:
     }
 
     s[i] = 0;
-    const_cast<Md5_Digest*>(this)->_m_is_valid = true;
-    return const_cast<Md5_Digest*>(this)->_m_string = { s, i };
+
+    const_cast<MD5_Digest*>(this)->_m_is_valid = true;
+    const_cast<MD5_Digest*>(this)->_m_string = { s, i };
+
+    return _m_string;
   }
 
   int serialize(void* buffer) const
@@ -67,15 +81,16 @@ public:
   
   int deserialize(const void* buffer)
   {
-    std::memcpy(_m_buffer, buffer, 16);
+    std::memcpy(_m_buffer, buffer, sizeof(_m_buffer));
     _m_is_valid = false;
-    return 16;
+    
+    return sizeof(_m_buffer);
   }
 
   int deserialize(const void* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 };
 
-std::ostream& operator<<(std::ostream& __o, const Md5_Digest& digest)
+std::ostream& operator<<(std::ostream& __o, const MD5_Digest& digest)
 {
   __o << digest.to_string(); return __o;
 }

@@ -7,7 +7,7 @@
 class WindowsSocketsApi
 {
   static bool _s_is_initialized;
-  static int _s_count;
+  static int  _s_count;
 
 public:
   static void Startup()

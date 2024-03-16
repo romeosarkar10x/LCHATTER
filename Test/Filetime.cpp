@@ -20,6 +20,7 @@ public:
   {
     unsigned long long timepoint_now;
     GetSystemTimeAsFileTime(reinterpret_cast<FILETIME*>(&timepoint_now));
+    
     return timepoint_now - _m_timepoint;
   }
   
@@ -60,12 +61,22 @@ public:
 
 
 
-// Example Usage
-int main() {
-    // FILETIME ft;
-    // GetSystemTimeAsFileTime(&ft);  // Get current time as FILETIME
-    // FileTimeToDateTime(ft);  // Convert and display as DateTime
-    TimePoint now;
-    now.FileTimeToDateTime();
-    return 0;
+// // Example Usage
+// int main() {
+//     // FILETIME ft;
+//     // GetSystemTimeAsFileTime(&ft);  // Get current time as FILETIME
+//     // FileTimeToDateTime(ft);  // Convert and display as DateTime
+//     TimePoint now;
+//     now.FileTimeToDateTime();
+//     return 0;
+// }
+
+
+int main()
+{
+  FILETIME t;
+  GetSystemTimeAsFileTime(&t);
+
+  std::cout << t.dwHighDateTime << " " << t.dwLowDateTime << "\n";
+  return 0;
 }

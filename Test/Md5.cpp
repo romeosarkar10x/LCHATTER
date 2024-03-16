@@ -1,13 +1,13 @@
 #include <cstring>
 #include "../Common/String.cpp"
-#include "../Common/Hash/Md5_Hash.cpp"
-#include "../Common/Hash/Md5_Digest.cpp"
+#include "../Common/Hash/MD5_Hash.cpp"
+#include "../Common/Hash/MD5_Digest.cpp"
 
 int main()
 {
   String str { "hola" };
 
-  auto digest = Md5_Hash::calculate_digest(str);
+  auto digest = MD5_Hash::calculate_digest(str);
   std::cout << digest << "\n";
 
   return 0;

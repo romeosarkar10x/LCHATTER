@@ -2,9 +2,9 @@
 #include <cstring>
 
 #include "../Fwd.hpp"
-#include "Md5_Digest.cpp"
+#include "MD5_Digest.cpp"
 
-class Md5_Hash
+class MD5_Hash
 {
   static u_int _s_rotate_left(u_int u, u_char amount)
   {
@@ -23,14 +23,14 @@ class Md5_Hash
   }
 
 public:
-  Md5_Hash() = delete;
-  Md5_Hash(const Md5_Hash&) = delete;
-  Md5_Hash(Md5_Hash&&) = delete;
-  Md5_Hash& operator=(const Md5_Hash&) = delete;
-  Md5_Hash& operator=(Md5_Hash&&) = delete;
-  ~Md5_Hash() = delete;
+  MD5_Hash() = delete;
+  MD5_Hash(const MD5_Hash&) = delete;
+  MD5_Hash(MD5_Hash&&) = delete;
+  MD5_Hash& operator=(const MD5_Hash&) = delete;
+  MD5_Hash& operator=(MD5_Hash&&) = delete;
+  ~MD5_Hash() = delete;
 
-  static Md5_Digest calculate_digest(const void* input, int length) /// length in bytes
+  static MD5_Digest calculate_digest(const void* input, int length) /// length in bytes
   {
     void* tmp = new char[_s_tmp_buffer_length(length)];
     std::memcpy(tmp, input, length);
@@ -107,13 +107,13 @@ public:
     
     u_int* digest_buffer = new u_int[4];
     digest_buffer[0] = a, digest_buffer[1] = b, digest_buffer[2] = c, digest_buffer[3] = d;
-    Md5_Digest digest { digest_buffer };
+    MD5_Digest digest { digest_buffer };
 
     delete [] reinterpret_cast<char*>(tmp);
     delete [] digest_buffer;
-
+    
     return digest;
   }
   
-  static Md5_Digest calculate_digest(const String& str) { return calculate_digest(str.buffer(), str.length()); }
+  static MD5_Digest calculate_digest(const String& str) { return calculate_digest(str.buffer(), str.length()); }
 };

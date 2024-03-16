@@ -2,11 +2,12 @@
 #define APP_BACKEND_CPP
 
 #include <set>
+#include <cstdlib>
 
-#include "../Common/Addr.cpp"
+#include "../Common/Address.cpp"
 #include "../Other/Socket/Udp/UdpSender.cpp"
 #include "../Other/Socket/Udp/UdpReceiver.cpp"
-#include "../App/Event.hpp"
+#include "../App/Event.cpp"
 #include "../Common/User.cpp"
 #include "../Common/Connection.cpp"
 #include "../Log/Logger.cpp"
@@ -17,7 +18,7 @@ public:
   enum class State : unsigned char
   {
     NOT_LOGGED_IN,
-    LOGGED_IN
+    LOGGED_IN,
   };
 
 private:
@@ -34,6 +35,23 @@ private:
   static const int _S_message_buffer_length = 40000;
   static char* _s_buffer_message;
 
+  static Event _s_event;
+
+  static State _s_state;
+
+  static User _s_me;
+
+  static UdpSender _s_sender;
+  static UdpReceiver _s_receiver;
+
+  static std::set<Connection> _s_connections;
+
+  static void _s_init()
+  {
+    _s_sender.init();
+    _s_receiver.init();
+  }
+  
   static void _s_init_buffers()
   {
     _s_buffer_username = new char[_S_username_psw_buffer_length];
@@ -45,16 +63,16 @@ private:
     _s_buffer_message = new char[_S_message_buffer_length];
   }
 
-  static Event _s_event;
+  static void _s_clear_buffers()
+  {
+    _s_buffer_username[0] = 0;
+    _s_buffer_psw[0] = 0;
 
-  static State _s_state;
-
-  static User _s_me;
-
-  static UdpSender _s_sender;
-  static UdpReceiver _s_receiver;
-
-  static std::set<Connection> _s_connections;
+    _s_buffer_ip_address[0] = 0;
+    _s_buffer_port[0] = 0;
+    
+    _s_buffer_message[0] = 0;
+  }
 
   static void _s_handle_event()
   {
@@ -69,12 +87,16 @@ private:
       _s_state = State::LOGGED_IN;
       break;
     case Event::CONNECT:
+      _s_connect();
       break;
     case Event::CONNECT_ACCEPT:
+      _s_connect_accept();
       break;
     case Event::CONNECT_REJECT:
+      _s_connect_reject();
       break;
-    case Event::MESSAGE:
+    case Event::CHAT_MESSAGE:
+      _s_chat_message();
       break;
 
     default:
@@ -93,21 +115,44 @@ private:
     _s_login();
   }
 
-  static void _s_connect() {}
+  static void _s_connect()
+  {
+    Address address { _s_buffer_ip_address, static_cast<u_short>(std::strtoul(_s_buffer_port, nullptr, 0)) };
+    _s_sender.send_connect(address);
+  }
+
+  static void _s_connect_reject()
+  {
+
+  }
+  static void _s_connect_accept()
+  {
+
+  }
+
+  static void _s_chat_message()
+  {
+
+  }
+
+  static void _s_update()
+  {
+    // _s_receiver.receive();
+  }
 
 public:
   
 
-  static const User& me() { return _s_me; }
-  static const std::set<Connection>& connections() { return _s_connections; }
+  static const User& get_me() { return _s_me; }
+  static const std::set<Connection>& get_connections() { return _s_connections; }
 
-  static char* buffer_username() { return _s_buffer_username; }
-  static char* buffer_psw() { return _s_buffer_psw; }
+  static char* get_buffer_username() { return _s_buffer_username; }
+  static char* get_buffer_psw() { return _s_buffer_psw; }
 
-  static char* buffer_ip_address() { return _s_buffer_ip_address; }
-  static char* buffer_port() { return _s_buffer_port; }
+  static char* get_buffer_ip_address() { return _s_buffer_ip_address; }
+  static char* get_buffer_port() { return _s_buffer_port; }
 
-  static char* buffer_message() { return _s_buffer_message; }
+  static char* get_buffer_message() { return _s_buffer_message; }
 
   static const int buffer_username_length = _S_username_psw_buffer_length;
   static const int buffer_psw_length = _S_username_psw_buffer_length;
@@ -117,35 +162,38 @@ public:
 
   static const int buffer_message_length = _S_message_buffer_length;
 
-
   static void init()
   {
     _s_init_buffers();
+    _s_init();
   }
-
-  
 
   static void update()
   {
-    
+    _s_handle_event();
+    _s_update();
   }
 
-  static void set_event(Event event) { _s_event = event; }
+  static void set_event(Event event)
+  {
+    logger << "set_event: " << event << "\n";
+    _s_event = event;
+  }
   
-  static State state() { return _s_state; }
+  static State get_state() { return _s_state; }
   
   AppBackend() = delete;
   ~AppBackend() = delete;
 
 };
 
-char* AppBackend::_s_buffer_username;
-char* AppBackend::_s_buffer_psw;
+char* AppBackend::_s_buffer_username { nullptr };
+char* AppBackend::_s_buffer_psw { nullptr };
 
-char* AppBackend::_s_buffer_ip_address;
-char* AppBackend::_s_buffer_port;
+char* AppBackend::_s_buffer_ip_address { nullptr };
+char* AppBackend::_s_buffer_port { nullptr };
 
-char* AppBackend::_s_buffer_message;
+char* AppBackend::_s_buffer_message { nullptr };
 
 Event AppBackend::_s_event { Event::NONE };
 

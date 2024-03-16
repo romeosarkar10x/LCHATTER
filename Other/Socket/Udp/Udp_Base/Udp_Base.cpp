@@ -4,7 +4,7 @@
 #include <cassert>
 #include <winsock2.h>
 
-#include "../../Addr_Base.cpp"
+#include "../../Address_Base.cpp"
 #include "../../WindowsSocketsApi.cpp"
 #include "../../../../Log/Logger.cpp"
 
@@ -20,7 +20,7 @@ public:
 
   bool      _m_is_initialized { false };
   SOCKET    _m_socket;
-  Addr_Base _m_socket_addr;
+  Address_Base _m_socket_addr;
   void*     _m_buffer;
   int       _m_offset;
 

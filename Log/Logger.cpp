@@ -2,12 +2,7 @@
 #define LOG_CPP
 
 #include <fstream>
-#include "../Other/Socket/Addr_Base.cpp"
-
-std::ostream& operator<<(std::ostream& __o, const Addr_Base& __addr)
-{
-  __o << __addr.to_string(); return __o;
-}
+#include "../Other/Socket/Address_Base.cpp"
 
 class Logger
 {

@@ -1,9 +1,11 @@
 #ifndef UDP_SENDER_CPP
 #define UDP_SENDER_CPP
 
-#include "Config.hpp"
-#include "UdpMessage/ChatMessage.cpp"
+#include "UdpMessage/UdpMessage_ChatMessage.cpp"
 #include "Udp_Base/UdpSender_Base.cpp"
+#include "AppConfig.cpp"
+
+
 
 class UdpSender final : private UdpSender_Base
 {
@@ -15,31 +17,37 @@ public:
     std::memcpy(buffer(), _S_Signature, _S_Signature_Length); 
   }
 
-  void conn(const Addr& host);
-  void conn_ack(const Addr& host);
-
-  void ping(const Addr& host);
-
-  void chat_msg(const Addr& receiver, const UdpChatMessage& msg)
+  void send_connect(const Address& receiver)
   {
-    reset_offset();
-    _m_write_signature();
-    _m_write_msg_type(msg.type());
-    
-    std::memcpy(static_cast<char*>(buffer()) + get_offset(), msg.buffer(), msg.length());
-    increment_offset(msg.length());
-    send(receiver);
+
   }
 
-  void chat_msg(const Addr& receiver, const ChatMessage_View& msg)
+
+  void send_connect_accept(const Address& receiver)
   {
-    reset_offset();
-    _m_write_signature();
-    _m_write_msg_type(msg.type());
+
+  }
+  
+  void send_connect_reject(const Address& receiver)
+  {
+
+  }
+
+  void send_ping(const Address& receiver)
+  {
     
-    std::memcpy(static_cast<char*>(buffer()) + get_offset(), msg.buffer(), msg.length());
-    increment_offset(msg.length());
-    send(receiver);
+  }
+
+  void send_chat_message(const Address& receiver, const ChatMessage& message)
+  {
+    // reset_offset();
+
+    // _m_write_signature();
+    // _m_write_message_type(UdpMessage::Type::CHAT_MESSAGE);
+    
+    // std::memcpy(static_cast<char*>(buffer()) + get_offset(), message.buffer(), message.length());
+    // increment_offset(message.length());
+    // send(receiver);
   }
 
   void _m_write_signature()
@@ -48,7 +56,8 @@ public:
     memcpy(p, _S_Signature, _S_Signature_Length);
     increment_offset(_S_Signature_Length);
   }
-  void _m_write_msg_type(UdpMessage::Type type)
+
+  void _m_write_message_type(UdpMessage::Type type)
   {
     void* p = reinterpret_cast<char*>(buffer()) + get_offset();
     *reinterpret_cast<UdpMessage*>(p) = type;

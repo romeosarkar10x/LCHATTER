@@ -1,10 +1,10 @@
 #include "UdpMessage.cpp"
 
-class Ping : public UdpMessage
+class UdpMessage_Ping : public UdpMessage
 {
 public:
 
   Ping() : UdpMessage(UdpMessage::Type::PING) {}
 
-  // Addr _m_sender;
+  // Address _m_sender;
 };

@@ -5,7 +5,7 @@
 #include "Udp_Base.cpp"
 #include "../UdpMessage/UdpMessage.cpp"
 #include "../../WindowsSocketsApi.cpp"
-#include "../../../../Common/Addr.cpp"
+#include "../../../../Common/Address.cpp"
 #include "../../../../Log/Logger.cpp"
 
 class UdpReceiver_Base : private Udp_Base
@@ -14,7 +14,7 @@ class UdpReceiver_Base : private Udp_Base
   static int _s_counter;
   
   int _m_id;
-  Addr_Base _m_sender_addr;
+  Address_Base _m_sender_addr;
 
 public:
   UdpReceiver_Base() : Udp_Base {}, _m_id { _s_counter++ } {}

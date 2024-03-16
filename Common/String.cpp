@@ -10,7 +10,7 @@
 class String
 {
   char* _m_p { nullptr };
-  int _m_length { 0 };
+  int _m_length;
 
   friend String operator+(const char* lhs, const String& rhs);
 
@@ -27,13 +27,16 @@ public:
 
   String(const String& rhs) : _m_length { rhs._m_length }
   {
-    if(_m_p != nullptr)
+    if(rhs._m_p != nullptr)
     {
       _m_p = new char[_m_length + 1];
       std::memcpy(_m_p, rhs._m_p, _m_length + 1);
     }
   }
-  String(String&& rhs) noexcept : _m_p { std::exchange(rhs._m_p, nullptr) }, _m_length { std::exchange(rhs._m_length, 0) } {}
+
+  String(String&& rhs) noexcept :
+  _m_p { std::exchange(rhs._m_p, nullptr) },
+  _m_length { std::exchange(rhs._m_length, 0) } {}
 
   ~String()
   {
@@ -51,6 +54,7 @@ public:
     swap(copy);
     return *this;
   }
+
   String& operator=(String&& rhs) { swap(rhs); return *this; }
 
   void swap(String& rhs) noexcept
@@ -99,7 +103,7 @@ public:
   
   int serialize(void* buffer) const
   {
-    std::memcpy(buffer, _m_p, _m_length);
+    std::memcpy(buffer, _m_p, _m_length + 1);
     return _m_length + 1;
   }
 
@@ -130,7 +134,7 @@ String operator+(const char* lhs, const String& rhs)
 
 std::ostream& operator<<(std::ostream& __o, const String& string)
 {
-  __o << string.ptr(); return __o;
+  __o << ((string.ptr() == nullptr) ? "null" : string.ptr()); return __o;
 }
 
 #endif

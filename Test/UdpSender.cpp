@@ -9,7 +9,7 @@ int main()
   UdpSender s; s.init();
 
   char* buf = new char[40000];
-  Addr receiver_addr("192.168.0.100", 5678);
+  Address receiver_addr("192.168.0.100", 5678);
   std::cout << _S_Signature << "\n";
 
   while(true)

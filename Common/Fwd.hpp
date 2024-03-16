@@ -4,8 +4,8 @@
 class UdpReceiver;
 class UdpSender;
 
-class Md5_Digest;
-class Md5_Hash;
+class MD5_Digest;
+class MD5_Hash;
 
 using u_int = unsigned int;
 using u_char = unsigned char;

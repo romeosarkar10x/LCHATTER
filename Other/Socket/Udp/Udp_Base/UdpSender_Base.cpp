@@ -4,7 +4,7 @@
 
 #include "Udp_Base.cpp"
 #include "../UdpMessage/UdpMessage.cpp"
-#include "../../../../Common/Addr.cpp"
+#include "../../../../Common/Address.cpp"
 #include "../../../../Log/Logger.cpp"
 
 
@@ -34,7 +34,7 @@ public:
   using Udp_Base::    reset_offset;
   using Udp_Base::increment_offset;
 
-  void send(const Addr_Base& receiver_addr)
+  void send(const Address_Base& receiver_addr)
   {
     assert(_m_is_initialized);
 
