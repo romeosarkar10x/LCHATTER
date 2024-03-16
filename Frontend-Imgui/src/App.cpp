@@ -40,8 +40,8 @@ public:
 
 private:
   void SendMessage(const char *message);
-  void LoginWindow();
-  void ChatWindow();
+  void ShowLoginWindow();
+  void ShowChatWindow();
   void AddConnectionWindow();
 
   std::vector<Conversation> conversations;
@@ -51,7 +51,8 @@ private:
 };
 
 // /*
-int isLoggedIn = false, showAddConnectionForm = false;
+// int isLoggedIn = false, 
+int showAddConnectionForm = false;
 std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
 
 // Generates 20 dummy contacts and conversations
@@ -164,13 +165,13 @@ void App::Update()
   // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-  if (!isLoggedIn)
+  if (AppBackend::state() == AppBackend::State::NOT_LOGGED_IN)
   {
-    LoginWindow();
+    ShowLoginWindow();
   }
   else
   {
-    ChatWindow();
+    ShowChatWindow();
   }
 
   // Don't forget to pop the style variable to reset the padding back to default for subsequent windows
@@ -221,7 +222,7 @@ void App::SendMessage(const char *message)
   std::cout << "Sending message: " << message << std::endl;
 }
 
-void App::LoginWindow()
+void App::ShowLoginWindow()
 {
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
@@ -232,27 +233,27 @@ void App::LoginWindow()
 
     // Login Child Window
     {
-      ImGui::BeginChild("LogInWindow", childWindowSize);
+      ImGui::BeginChild("ShowLoginWindow", childWindowSize);
 
-      // ImGui::InputText("Username", AppBackend::buffer_username(), AppBackend::buffer_username_length);
-      // ImGui::InputText("Password", AppBackend::buffer_psw(), AppBackend::buffer_psw_length,
-      //                  ImGuiInputTextFlags_Password);
+      ImGui::InputText("Username", AppBackend::buffer_username(), AppBackend::buffer_username_length);
+      ImGui::InputText("Password", AppBackend::buffer_psw(), AppBackend::buffer_psw_length,
+                       ImGuiInputTextFlags_Password);
 
-      static char username[128] = "";
-      static char password[128] = "";
+      // static char username[128] = "";
+      // static char password[128] = "";
 
-      ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
-      ImGui::InputText("Password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
+      // ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
+      // ImGui::InputText("Password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
 
       if (ImGui::Button("Log In"))
       {
-        isLoggedIn = true;
-        // AppBackend::set_event(Event::LOGIN);
+        // isLoggedIn = true;
+        AppBackend::set_event(Event::LOGIN);
       }
       if (ImGui::Button("Log in anonymous user"))
       {
-        isLoggedIn = true;
-        // AppBackend::set_event(Event::LOGIN_ANONYMOUS);
+        // isLoggedIn = true;
+        AppBackend::set_event(Event::LOGIN_ANONYMOUS);
       }
     }
     ImGui::EndChild();
@@ -261,34 +262,22 @@ void App::LoginWindow()
 }
 void App::AddConnectionWindow()
 {
-  // if (ImGui::Begin("AddConnectionWindow", nullptr, mainWindowFlag))
-  // {
-  //   ImVec2 windowSize = ImGui::GetContentRegionAvail();
-  //   ImVec2 childWindowSize = ImVec2(400, 220);
+  // static char IP[128] = "";
+  // static char PORT[128] = "";
+  // ImGui::InputText("IP Addr", IP, IM_ARRAYSIZE(IP));
+  // ImGui::InputText("PORT", PORT, IM_ARRAYSIZE(PORT));
 
-  //   ImGui::SetCursorPos(ImVec2((windowSize.x - childWindowSize.x) / 2, (windowSize.y - childWindowSize.y) / 2));
+  ImGui::InputText("IP Addr", AppBackend::buffer_ip_address(), AppBackend::buffer_ip_address_length);
+  ImGui::InputText("PORT", AppBackend::buffer_port(), AppBackend::buffer_port_length);
 
-  //   // Login Child Window
-  //   {
-  //     ImGui::BeginChild("Child", childWindowSize);
-
-  static char IP[128] = "";
-  static char PORT[128] = "";
-
-  ImGui::InputText("IP Addr", IP, IM_ARRAYSIZE(IP));
-  ImGui::InputText("PORT", PORT, IM_ARRAYSIZE(PORT));
-
-  if (ImGui::Button("Add"))
+  if (ImGui::Button("Connect"))
   {
     showAddConnectionForm = false;
+    AppBackend::set_event(Event::CONNECT);
     // isLoggedIn = true;
   }
-  //   }
-  //   ImGui::EndChild();
-  // }
-  // ImGui::End();
 }
-void App::ChatWindow()
+void App::ShowChatWindow()
 {
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
@@ -314,17 +303,20 @@ void App::ChatWindow()
       ImGui::Text("Connections");
       ImGui::PopFont();
       ImGui::Separator();
+
+
       /*
-        int i = 0;
-        for (auto &connection : AppBackend::connections())
+      int i = 0;
+      for (auto &connection : AppBackend::connections())
+      {
+        if (ImGui::Selectable(connection.user().name(), i == selectedConversationIndex))
         {
-          if (ImGui::Selectable(connection.user().name(), i == selectedConversationIndex))
-          {
-            selectedConversationIndex = i;
-          }
-          i++;
+          selectedConversationIndex = i;
         }
+        i++;
+      }
       */
+
       for (int i = 0; i < static_cast<int>(conversations.size()); ++i)
       {
         if (ImGui::Selectable(conversations[i].contactName.c_str(), i == selectedConversationIndex))
@@ -342,7 +334,7 @@ void App::ChatWindow()
       ImGui::BeginChild("RightParent", ImVec2(rightWidth, windowSize.y));
       if (selectedConversationIndex == -1)
       {
-        TextWithAlignment("Select a App to start messaging", ImVec2(1, 1));
+        TextWithAlignment("Select a chat to start messaging", ImVec2(1, 1));
       }
       else
       {

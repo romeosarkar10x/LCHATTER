@@ -13,7 +13,6 @@
 #include <iostream>
 #include <string>
 
-
 #include "../../Backend/AppBackend.cpp"
 
 void ErrorCallback(int error, const char *description);
@@ -23,8 +22,6 @@ void ErrorCallback(int error, const char *description)
 {
   fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
-
-
 
 template <typename Derived> class App_Base
 {
@@ -63,7 +60,7 @@ public:
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform
     // Windows
     // io.ConfigViewportsNoAutoMerge = true;
@@ -472,8 +469,8 @@ public:
   void Run()
   {
     // Initialize the underlying app
+    AppBackend::init();
     StartUp();
-    // AppBackend::init();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -487,6 +484,7 @@ public:
 
       // Main loop of the underlying app
       Update();
+      AppBackend::update();
 
       // Rendering
       ImGui::Render();
