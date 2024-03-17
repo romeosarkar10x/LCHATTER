@@ -24,7 +24,12 @@ struct Conversation
   std::string contactName; // Or contact ID if you have one
   std::vector<Message> messages;
 };
-// */
+
+struct ConnectionRequest
+{
+  std::string username;
+};
+
 class App : public App_Base<App>
 {
 public:
@@ -43,27 +48,37 @@ private:
   void ShowLoginWindow();
   void ShowChatWindow();
   void AddConnectionWindow();
+  void ShowConnectionRequestWindow();
 
-  std::vector<Conversation> conversations;
+  // std::vector<Conversation> conversations;
   int selectedConversationIndex = -1;
+  int selectedRequestIndex = -1;
   ImFont *h1Font, *h2Font;
   ImGuiWindowFlags mainWindowFlag;
 };
 
 // /*
-// int isLoggedIn = false, 
-int showAddConnectionForm = false;
+// int isLoggedIn = false,
+bool showAddConnectionForm = false;
+bool showConnectionRequestWindow = false;
 std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
 
 // Generates 20 dummy contacts and conversations
-std::vector<Conversation> generateDummyData()
+std::vector<Conversation> conversations;
+std::vector<ConnectionRequest> outgoingRequests;
+std::vector<ConnectionRequest> incomingRequests;
+
+void generateDummyData()
 {
-  std::vector<Conversation> conversations;
   std::random_device rd;
   std::mt19937 rng(rd());
 
   for (int i = 0; i < static_cast<int>(contactNames.size()); ++i)
   {
+    ConnectionRequest tmp;
+    tmp.username = contactNames[i];
+    incomingRequests.push_back(tmp);
+
     Conversation conv;
     conv.contactName = contactNames[i];
 
@@ -81,7 +96,7 @@ std::vector<Conversation> generateDummyData()
     conversations.push_back(conv);
   }
 
-  return conversations;
+  // return conversations;
 }
 // */
 
@@ -150,12 +165,13 @@ void App::StartUp()
   // Adjust ImGui style parameters
   // ImGuiStyle &style = ImGui::GetStyle();
 
-  conversations = generateDummyData();
+  generateDummyData();
 }
 
 void App::Update()
 {
-  mainWindowFlag = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+  mainWindowFlag = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings |
+                   ImGuiWindowFlags_NoBringToFrontOnFocus;
 
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -165,7 +181,7 @@ void App::Update()
   // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-  if (AppBackend::state() == AppBackend::State::NOT_LOGGED_IN)
+  if (AppBackend::get_state() == AppBackend::State::NOT_LOGGED_IN)
   {
     ShowLoginWindow();
   }
@@ -235,8 +251,8 @@ void App::ShowLoginWindow()
     {
       ImGui::BeginChild("ShowLoginWindow", childWindowSize);
 
-      ImGui::InputText("Username", AppBackend::buffer_username(), AppBackend::buffer_username_length);
-      ImGui::InputText("Password", AppBackend::buffer_psw(), AppBackend::buffer_psw_length,
+      ImGui::InputText("Username", AppBackend::get_buffer_username(), AppBackend::buffer_username_length);
+      ImGui::InputText("Password", AppBackend::get_buffer_psw(), AppBackend::buffer_psw_length,
                        ImGuiInputTextFlags_Password);
 
       // static char username[128] = "";
@@ -267,8 +283,8 @@ void App::AddConnectionWindow()
   // ImGui::InputText("IP Addr", IP, IM_ARRAYSIZE(IP));
   // ImGui::InputText("PORT", PORT, IM_ARRAYSIZE(PORT));
 
-  ImGui::InputText("IP Addr", AppBackend::buffer_ip_address(), AppBackend::buffer_ip_address_length);
-  ImGui::InputText("PORT", AppBackend::buffer_port(), AppBackend::buffer_port_length);
+  ImGui::InputText("IP Addr", AppBackend::get_buffer_ip_address(), AppBackend::buffer_ip_address_length);
+  ImGui::InputText("PORT", AppBackend::get_buffer_port(), AppBackend::buffer_port_length);
 
   if (ImGui::Button("Connect"))
   {
@@ -277,6 +293,107 @@ void App::AddConnectionWindow()
     // isLoggedIn = true;
   }
 }
+
+void App::ShowConnectionRequestWindow()
+{
+  // Set the fixed width for the window and let ImGui determine the height dynamically
+  ImGui::SetNextWindowSize(ImVec2(600, 0), ImGuiCond_Always);
+
+  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.10f, 0.10f, 0.14f, 1.0f)); // Dark background
+  ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.23f, 0.23f, 0.29f, 1.0f));      // Slightly lighter for tab backgrounds
+  ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.4f, 0.4f, 0.8f, 1.0f));  // Purple for hovered tabs
+  ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.3f, 0.3f, 0.6f, 1.0f));   // Darker purple for active tabs
+
+  if (ImGui::Begin("Connection Requests", &showConnectionRequestWindow))
+  {
+
+    if (ImGui::BeginTabBar("RequestsTabBar"))
+    {
+      if (ImGui::BeginTabItem("Incoming Requests"))
+      {
+
+        for (int i = 0; i < (int)incomingRequests.size(); ++i)
+        {
+          ImGui::PushID(i);
+
+          if (ImGui::Selectable(incomingRequests[i].username.c_str(), selectedRequestIndex == i))
+          {
+            selectedRequestIndex = (selectedRequestIndex == i) ? -1 : i;
+          }
+
+          if (selectedRequestIndex == i)
+          {
+            if (ImGui::Button("Accept"))
+            {
+              // AcceptConnectionRequest(incomingRequests[i]);
+              selectedRequestIndex = -1;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Decline"))
+            {
+              // DeclineConnectionRequest(incomingRequests[i]);
+              selectedRequestIndex = -1;
+            }
+          }
+
+          ImGui::PopID();
+        }
+
+        if (incomingRequests.empty())
+        {
+          ImGui::Text("No incoming requests.");
+        }
+
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("Outgoing Requests"))
+      {
+        for (int i = 0; i < (int)outgoingRequests.size(); ++i)
+        {
+          ImGui::PushID(i);
+
+          if (ImGui::Selectable(outgoingRequests[i].username.c_str(), selectedRequestIndex == i))
+          {
+            selectedRequestIndex = (selectedRequestIndex == i) ? -1 : i;
+          }
+
+          if (selectedRequestIndex == i)
+          {
+            if (ImGui::Button("Accept"))
+            {
+              // AcceptConnectionRequest(outgoingRequests[i]);
+              selectedRequestIndex = -1;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Decline"))
+            {
+              // DeclineConnectionRequest(outgoingRequests[i]);
+              selectedRequestIndex = -1;
+            }
+          }
+
+          ImGui::PopID();
+        }
+
+        if (outgoingRequests.empty())
+        {
+          ImGui::Text("No outgoing requests.");
+        }
+
+        ImGui::EndTabItem();
+      }
+
+      ImGui::EndTabBar();
+    }
+  }
+
+  ImGui::End();
+
+  // Pop all
+  ImGui::PopStyleColor(4);
+}
+
 void App::ShowChatWindow()
 {
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
@@ -294,6 +411,15 @@ void App::ShowChatWindow()
       {
         showAddConnectionForm = !showAddConnectionForm;
       }
+      ImGui::SameLine();
+      if (ImGui::Button("Connection Requests"))
+      {
+        showConnectionRequestWindow = !showConnectionRequestWindow;
+      }
+      if (showConnectionRequestWindow)
+      {
+        ShowConnectionRequestWindow();
+      }
       if (showAddConnectionForm)
       {
         AddConnectionWindow();
@@ -303,7 +429,6 @@ void App::ShowChatWindow()
       ImGui::Text("Connections");
       ImGui::PopFont();
       ImGui::Separator();
-
 
       /*
       int i = 0;
