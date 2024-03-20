@@ -24,14 +24,18 @@ public:
   void destory() { _m_destroy(); }
 
   using Udp_Base::buffer_size;
+  using Udp_Base::get_offset;
+  using Udp_Base::reset_offset;
+  using Udp_Base::increment_offset;
+
   
-  using Udp_Base::port;
-  using Udp_Base::buffer;
+  using Udp_Base::get_port;
+  using Udp_Base::get_buffer;
+
+  const Address_Base& get_address() const { return _m_sender_addr; }
   
-  // using Udp_Base::get_length;
-  // using Udp_Base::set_length;
   
-  void receive()
+  bool receive()
   {
     int length_sender_addr = sizeof(_m_sender_addr._m_addr);
 
@@ -41,13 +45,13 @@ public:
     {
       // _s_UdpReceiver_Base_Logger << "error " << WSAGetLastError() << "\n";
       // assert(WSAGetLastError() == WSAEWOULDBLOCK);
-      return;
+      return false;
     }
 
     reinterpret_cast<char*>(_m_buffer)[ret] = '\0';
     _m_offset = ret;
 
-    _s_UdpReceiver_Base_Logger << _m_sender_addr << " _m_buffer: " << _m_buffer << ", _m_offset: " << _m_offset << "\n";
+    _s_UdpReceiver_Base_Logger << "[" << _m_id << "].receive " << _m_sender_addr << " _m_buffer: " << _m_buffer << ", _m_offset: " << _m_offset << "\n";
 
     for(int i = 0; i < _m_offset; i++)
     {
@@ -61,6 +65,7 @@ public:
     }
 
     _s_UdpReceiver_Base_Logger << "\n";
+    return true;
   }
 };
 

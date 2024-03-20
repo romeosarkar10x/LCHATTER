@@ -1,34 +1,36 @@
-#ifndef CHAT_H
-#define CHAT_H
+#ifndef APP_CPP
+#define APP_CPP
 
 #include <ctime>
 #include <iostream>
 #include <random>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cstring>
 
 #include "App_Base.cpp"
 
 // /*
 // Structure for a single message
-struct Message
-{
-  std::string sender;
-  std::string content;
-  time_t timestamp;
-};
+// struct Message
+// {
+//   std::string sender;
+//   std::string content;
+//   time_t timestamp;
+// };
 
 // Structure for a conversation
-struct Conversation
-{
-  std::string contactName; // Or contact ID if you have one
-  std::vector<Message> messages;
-};
+// struct Conversation
+// {
+//   std::string contactName; // Or contact ID if you have one
+//   std::vector<Message> messages;
+// };
 
-struct ConnectionRequest
-{
-  std::string username;
-};
+// struct ConnectionRequest
+// {
+//   std::string username;
+// };
 
 class App : public App_Base<App>
 {
@@ -51,7 +53,7 @@ private:
   void ShowConnectionRequestWindow();
 
   // std::vector<Conversation> conversations;
-  int selectedConversationIndex = -1;
+  int selectedConnectionIndex = -1;
   int selectedRequestIndex = -1;
   ImFont *h1Font, *h2Font;
   ImGuiWindowFlags mainWindowFlag;
@@ -61,23 +63,24 @@ private:
 // int isLoggedIn = false,
 bool showAddConnectionForm = false;
 bool showConnectionRequestWindow = false;
-std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
+// std::vector<std::string> contactNames = {"Emily", "John", "Sarah", "Michael", "Alice", "David", "Bob", "Lisa"};
 
 // Generates 20 dummy contacts and conversations
-std::vector<Conversation> conversations;
+std::vector<Connection> connections;
 std::vector<ConnectionRequest> outgoingRequests;
 std::vector<ConnectionRequest> incomingRequests;
 
 void generateDummyData()
 {
+  /*
   std::random_device rd;
   std::mt19937 rng(rd());
 
   for (int i = 0; i < static_cast<int>(contactNames.size()); ++i)
   {
-    ConnectionRequest tmp;
-    tmp.username = contactNames[i];
-    incomingRequests.push_back(tmp);
+    // ConnectionRequest tmp;
+    // tmp.username = contactNames[i];
+    // incomingRequests.push_back(tmp);
 
     Conversation conv;
     conv.contactName = contactNames[i];
@@ -95,6 +98,7 @@ void generateDummyData()
 
     conversations.push_back(conv);
   }
+  */
 
   // return conversations;
 }
@@ -251,9 +255,8 @@ void App::ShowLoginWindow()
     {
       ImGui::BeginChild("ShowLoginWindow", childWindowSize);
 
-      ImGui::InputText("Username", AppBackend::get_buffer_username(), AppBackend::buffer_username_length);
-      ImGui::InputText("Password", AppBackend::get_buffer_psw(), AppBackend::buffer_psw_length,
-                       ImGuiInputTextFlags_Password);
+      ImGui::InputText("UserName", AppBackend::Buffer::UserName::_s_buffer, AppBackend::Buffer::UserName::_S_buffer_size);
+      ImGui::InputText("Password", AppBackend::Buffer::Password::_s_buffer, AppBackend::Buffer::Password::_S_buffer_size, ImGuiInputTextFlags_Password);
 
       // static char username[128] = "";
       // static char password[128] = "";
@@ -261,12 +264,12 @@ void App::ShowLoginWindow()
       // ImGui::InputText("Username", username, IM_ARRAYSIZE(username));
       // ImGui::InputText("Password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
 
-      if (ImGui::Button("Log In"))
+      if (ImGui::Button("LOG IN"))
       {
         // isLoggedIn = true;
         AppBackend::set_event(Event::LOGIN);
       }
-      if (ImGui::Button("Log in anonymous user"))
+      if (ImGui::Button("LOG IN AS ANONYMOUS_USER"))
       {
         // isLoggedIn = true;
         AppBackend::set_event(Event::LOGIN_ANONYMOUS);
@@ -283,13 +286,13 @@ void App::AddConnectionWindow()
   // ImGui::InputText("IP Addr", IP, IM_ARRAYSIZE(IP));
   // ImGui::InputText("PORT", PORT, IM_ARRAYSIZE(PORT));
 
-  ImGui::InputText("IP Addr", AppBackend::get_buffer_ip_address(), AppBackend::buffer_ip_address_length);
-  ImGui::InputText("PORT", AppBackend::get_buffer_port(), AppBackend::buffer_port_length);
+  ImGui::InputText("IP", AppBackend::Buffer::IpAddress::_s_buffer, AppBackend::Buffer::IpAddress::_S_buffer_size);
+  ImGui::InputText("PORT", AppBackend::Buffer::Port::_s_buffer, AppBackend::Buffer::Port::_S_buffer_size);
 
-  if (ImGui::Button("Connect"))
+  if (ImGui::Button("CONNECT"))
   {
     showAddConnectionForm = false;
-    AppBackend::set_event(Event::CONNECT);
+    AppBackend::set_event(Event::SEND_CONNECTION_REQUEST);
     // isLoggedIn = true;
   }
 }
@@ -297,12 +300,19 @@ void App::AddConnectionWindow()
 void App::ShowConnectionRequestWindow()
 {
   // Set the fixed width for the window and let ImGui determine the height dynamically
+  
   ImGui::SetNextWindowSize(ImVec2(600, 0), ImGuiCond_Always);
 
   ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.10f, 0.10f, 0.14f, 1.0f)); // Dark background
   ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.23f, 0.23f, 0.29f, 1.0f));      // Slightly lighter for tab backgrounds
   ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.4f, 0.4f, 0.8f, 1.0f));  // Purple for hovered tabs
   ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.3f, 0.3f, 0.6f, 1.0f));   // Darker purple for active tabs
+
+  incomingRequests = AppBackend::_s_incoming_connection_requests;
+  std::ranges::sort(incomingRequests, std::less<> {}, [] (const ConnectionRequest& r) { return r.get_timepoint_last_seen(); });
+
+  outgoingRequests = AppBackend::_s_outgoing_connection_requests;
+  std::ranges::sort(outgoingRequests, std::less<> {}, [] (const ConnectionRequest& r) { return r.get_timepoint_last_seen(); });
 
   if (ImGui::Begin("Connection Requests", &showConnectionRequestWindow))
   {
@@ -311,12 +321,12 @@ void App::ShowConnectionRequestWindow()
     {
       if (ImGui::BeginTabItem("Incoming Requests"))
       {
-
+        
         for (int i = 0; i < (int)incomingRequests.size(); ++i)
         {
           ImGui::PushID(i);
 
-          if (ImGui::Selectable(incomingRequests[i].username.c_str(), selectedRequestIndex == i))
+          if (ImGui::Selectable(incomingRequests[i].get_user().get_id(), selectedRequestIndex == i))
           {
             selectedRequestIndex = (selectedRequestIndex == i) ? -1 : i;
           }
@@ -325,6 +335,9 @@ void App::ShowConnectionRequestWindow()
           {
             if (ImGui::Button("Accept"))
             {
+              AppBackend::set_id(incomingRequests[i].get_user().get_id());
+              // std::cout << "id: " << incomingRequests[i].get_user().get_id() << std::endl;
+              AppBackend::set_event(Event::ACCEPT_CONNECTION_REQUEST);
               // AcceptConnectionRequest(incomingRequests[i]);
               selectedRequestIndex = -1;
             }
@@ -353,7 +366,7 @@ void App::ShowConnectionRequestWindow()
         {
           ImGui::PushID(i);
 
-          if (ImGui::Selectable(outgoingRequests[i].username.c_str(), selectedRequestIndex == i))
+          if (ImGui::Selectable(outgoingRequests[i].get_address().get_ip_address(), selectedRequestIndex == i))
           {
             selectedRequestIndex = (selectedRequestIndex == i) ? -1 : i;
           }
@@ -396,6 +409,8 @@ void App::ShowConnectionRequestWindow()
 
 void App::ShowChatWindow()
 {
+  connections = AppBackend::_s_connections;
+
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -406,7 +421,14 @@ void App::ShowChatWindow()
     {
       ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y));
 
-      ImGui::Text("username");
+      // ImGui::Text("username");
+      // Display Port Number
+      char port[10];
+      std::snprintf(port, 10, "%u", AppBackend::_s_receiver.get_port());
+
+      String text = port + String(" ") + AppBackend::_s_me.get_id(); 
+      ImGui::Text(text);
+
       if (ImGui::Button("Add New Connection"))
       {
         showAddConnectionForm = !showAddConnectionForm;
@@ -434,19 +456,21 @@ void App::ShowChatWindow()
       int i = 0;
       for (auto &connection : AppBackend::connections())
       {
-        if (ImGui::Selectable(connection.user().name(), i == selectedConversationIndex))
+        if (ImGui::Selectable(connection.user().name(), i == selectedConnectionIndex))
         {
-          selectedConversationIndex = i;
+          selectedConnectionIndex = i;
         }
         i++;
       }
       */
+      // std::cout << AppBackend::_s_connections.size() << std::endl;
 
-      for (int i = 0; i < static_cast<int>(conversations.size()); ++i)
+      for (int i = 0; i < static_cast<int>(AppBackend::_s_connections.size()); ++i)
       {
-        if (ImGui::Selectable(conversations[i].contactName.c_str(), i == selectedConversationIndex))
+        // std::cout << "i: " << AppBackend::_s_connections[i].get_user().get_id() << std::endl;
+        if (ImGui::Selectable(connections[i].get_user().get_id(), i == selectedConnectionIndex))
         {
-          selectedConversationIndex = i;
+          selectedConnectionIndex = i;
         }
       }
       ImGui::EndChild();
@@ -457,32 +481,39 @@ void App::ShowChatWindow()
     {
       // ImGui::BeginGroup();
       ImGui::BeginChild("RightParent", ImVec2(rightWidth, windowSize.y));
-      if (selectedConversationIndex == -1)
+      if (selectedConnectionIndex == -1)
       {
         TextWithAlignment("Select a chat to start messaging", ImVec2(1, 1));
       }
       else
       {
-        const Conversation &selectedConvo = conversations[selectedConversationIndex];
+        const Connection &selectedConnection = connections[selectedConnectionIndex];
 
         ImGui::PushFont(h1Font);
-        ImGui::Text("%s", selectedConvo.contactName.c_str());
+        ImGui::Text(selectedConnection.get_user().get_name());
         ImGui::PopFont();
 
         ImGui::Separator();
         if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
         {
+          auto itr = std::ranges::find(AppBackend::_s_connections, selectedConnection.get_user().get_id(), [] (const Connection& c) { return c.get_user().get_id(); }); 
           if (ImGui::BeginTabItem("Chats"))
           {
-            for (const Message &msg : selectedConvo.messages)
+            
+            for(const ChatMessage& m : itr->get_chat().get_messages())
             {
-              ImGui::Text(msg.content.c_str());
+              ImGui::Text(m.get_text());
             }
+            // for (const Message &msg : selectedConvo.messages)
+            // {
+            //   ImGui::Text(msg.content.c_str());
+            // }
             ImGui::EndTabItem();
           }
           if (ImGui::BeginTabItem("Details"))
           {
-            ImGui::Text("ID: 0123456789");
+            // ImGui::Text("ID: 0123456789");
+            ImGui::Text(itr->get_user().get_id());
             ImGui::EndTabItem();
           }
           ImGui::EndTabBar();
@@ -492,14 +523,14 @@ void App::ShowChatWindow()
         // ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 300);
         ImGui::Separator();
 
-        static char messageBuffer[10000] = "";
+        // static char messageBuffer[10000] = "";
         bool reclaim_focus = false;
         ImGuiInputTextFlags input_text_flags =
             ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
             ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
         // Used "##messageInputBox" to hide the label but ensure a unique ID
         if (ImGui::InputText(
-                "##messageInputBox", messageBuffer, IM_ARRAYSIZE(messageBuffer), input_text_flags,
+                "##messageInputBox", AppBackend::Buffer::ChatMessage::_s_buffer, AppBackend::Buffer::ChatMessage::_S_buffer_size, input_text_flags,
                 [](ImGuiInputTextCallbackData *data) -> int { return 0; }, (void *)this))
         {
           reclaim_focus = true;
@@ -514,7 +545,12 @@ void App::ShowChatWindow()
         ImGui::SameLine();
 
         // Adjust the size of the Send button
-        ImGui::Button("Send");
+        if(ImGui::Button("Send"))
+        {
+          AppBackend::set_id(connections[selectedConnectionIndex].get_user().get_id());
+          AppBackend::set_event(Event::SEND_CHAT_MESSAGE);
+        }
+        
         // */
       }
       ImGui::EndChild();

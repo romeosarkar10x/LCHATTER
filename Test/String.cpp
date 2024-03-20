@@ -1,6 +1,6 @@
 #include "../Common/String.cpp"
 
-void print_buffer(const void* buffer)
+void print_buffer(const char* buffer)
 {
   std::cout << "buffer: [" << reinterpret_cast<const char*>(buffer) << "]";
 }

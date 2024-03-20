@@ -10,7 +10,7 @@ class WindowsSocketsApi
   static int  _s_count;
 
 public:
-  static void Startup()
+  static void init()
   {
     if(!_s_is_initialized)
     {
@@ -22,7 +22,7 @@ public:
     _s_count++;
   }
 
-  static void Cleanup()
+  static void destroy()
   {
     if(0 == (--_s_count))
     {

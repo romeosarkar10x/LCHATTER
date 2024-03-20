@@ -2,15 +2,19 @@
 #define APP_BACKEND_CPP
 
 #include <set>
+#include <algorithm>
+
 #include <cstdlib>
 
-#include "../Common/Address.cpp"
-#include "../Other/Socket/Udp/UdpSender.cpp"
-#include "../Other/Socket/Udp/UdpReceiver.cpp"
+#include "../Log/Logger.cpp"
+
 #include "../App/Event.cpp"
 #include "../Common/User.cpp"
+#include "../Common/Address.cpp"
 #include "../Common/Connection.cpp"
-#include "../Log/Logger.cpp"
+
+#include "../Other/Socket/Udp/UdpSender.cpp"
+#include "../Other/Socket/Udp/UdpReceiver.cpp"
 
 class AppBackend
 {
@@ -21,83 +25,156 @@ public:
     LOGGED_IN,
   };
 
-private:
+  struct Buffer
+  {
+    struct UserName
+    {
+      static const int _S_buffer_size = 100;
+      static char* _s_buffer;
+    };
 
-  static const int _S_username_psw_buffer_length = 100;
-  static char* _s_buffer_username;
-  static char* _s_buffer_psw;
+    struct Password
+    {
+      static const int _S_buffer_size = 100;
+      static char* _s_buffer;
+    };
+    
+    struct IpAddress
+    {
+      static const int _S_buffer_size = 20; 
+      static char* _s_buffer;
+    };
+    
+    struct Port
+    {
+      static const int _S_buffer_size = 10;
+      static char* _s_buffer;
+    };
+    
+    struct ChatMessage
+    {
+      static const int _S_buffer_size = 40000;
+      static char* _s_buffer;
+    };
+    
+    static void _s_init()
+    {
+      UserName::_s_buffer = new char [UserName::_S_buffer_size];
+      Password::_s_buffer = new char [Password::_S_buffer_size];
 
-  static const int _S_ip_address_buffer_length = 20;
-  static char* _s_buffer_ip_address;
-  static const int _S_port_buffer_length = 10;
-  static char* _s_buffer_port;
+      IpAddress::_s_buffer = new char [IpAddress::_S_buffer_size];
+      Port::_s_buffer = new char [Port::_S_buffer_size];
 
-  static const int _S_message_buffer_length = 40000;
-  static char* _s_buffer_message;
+      ChatMessage::_s_buffer = new char[ChatMessage::_S_buffer_size];
+      assert(ChatMessage::_s_buffer != nullptr);
+    }
 
-  static Event _s_event;
+    static void _s_clear()
+    {
+      UserName::_s_buffer[0] = 0;
+      Password::_s_buffer[0] = 0;
+
+      IpAddress::_s_buffer[0] = 0;
+      Port::_s_buffer[0] = 0;
+      
+      ChatMessage::_s_buffer[0] = 0;
+    }
+  };
+
+  static Event  _s_event;
+  static String _s_current_id;
+  static constexpr auto _Projection = [] (const ConnectionRequest& c) -> const String& { return c.get_user().get_id(); };
 
   static State _s_state;
 
-  static User _s_me;
 
-  static UdpSender _s_sender;
-  static UdpReceiver _s_receiver;
+  static User         _s_me;
+  static UdpSender    _s_sender;
+  static UdpReceiver  _s_receiver;
 
-  static std::set<Connection> _s_connections;
+  static std::vector<ConnectionRequest> _s_incoming_connection_requests;
+  static std::vector<ConnectionRequest> _s_outgoing_connection_requests;
 
-  static void _s_init()
-  {
-    _s_sender.init();
-    _s_receiver.init();
-  }
+  static std::vector<Connection> _s_connections;
   
-  static void _s_init_buffers()
-  {
-    _s_buffer_username = new char[_S_username_psw_buffer_length];
-    _s_buffer_psw = new char[_S_username_psw_buffer_length];
-
-    _s_buffer_ip_address = new char[_S_ip_address_buffer_length];
-    _s_buffer_port = new char[_S_port_buffer_length];
-
-    _s_buffer_message = new char[_S_message_buffer_length];
-  }
-
-  static void _s_clear_buffers()
-  {
-    _s_buffer_username[0] = 0;
-    _s_buffer_psw[0] = 0;
-
-    _s_buffer_ip_address[0] = 0;
-    _s_buffer_port[0] = 0;
-    
-    _s_buffer_message[0] = 0;
-  }
-
+private:
   static void _s_handle_event()
   {
+    if(_s_event != Event::NONE) { logger << _s_event << "\n"; }
+
     switch(_s_event)
     {
-    case Event::LOGIN:
-      _s_login();
-      _s_state = State::LOGGED_IN;
-      break;
     case Event::LOGIN_ANONYMOUS:
-      _s_login_anonymous();
+      std::memcpy(Buffer::UserName::_s_buffer, "ANONYMOUS_USER", 15);
+      /* need to generate an unique password */
+      // fall
+
+    case Event::LOGIN:
+      // Error Check ...
+      _s_me.init(Buffer::UserName::_s_buffer, Buffer::Password::_s_buffer);
       _s_state = State::LOGGED_IN;
       break;
-    case Event::CONNECT:
-      _s_connect();
+
+    case Event::SEND_CONNECTION_REQUEST:
+    {
+      Address receiver { Buffer::IpAddress::_s_buffer, static_cast<u_short>(std::strtoul(Buffer::Port::_s_buffer, nullptr, 0)) };
+      _s_outgoing_connection_requests.emplace_back(User {}, receiver);
+      
+      auto* m = new UdpMessage_ConnectionRequest {
+        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_port() } }
+      };
+
+      _s_sender.send(receiver, m);
+      delete m;
       break;
-    case Event::CONNECT_ACCEPT:
-      _s_connect_accept();
+    }
+
+    case Event::ACCEPT_CONNECTION_REQUEST:
+    {
+      // std::cout << "Current Id: " << _s_current_id << &_s_current_id << std::endl;
+      // std::cout << &(_s_incoming_connection_requests[0].get_user().get_id()) << std::endl;
+      // std::cout << _s_incoming_connection_requests.size() << std::endl;
+      // for(const auto& r : _s_incoming_connection_requests) { std::cout << r.get_user().get_id() << " " << &r.get_user().get_id() << std::endl; }
+      
+      auto itr = std::ranges::find(_s_incoming_connection_requests, _s_current_id, _Projection);
+      
+      // std::cout << "HERE" << std::endl;
+      assert(itr != _s_incoming_connection_requests.end());
+      
+      Address receiver_addr { itr->get_address() };
+
+      auto* m = new UdpMessage_ConnectionRequest_Accepted {
+        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_port() } }
+      };
+
+      itr->set_state(ConnectionRequest::State::ACCEPTED);
+      // itr->get_address().set_ip_address(receiver_addr);
+      _s_sender.send(receiver_addr, m);
+      _s_connections.emplace_back(*itr);
+      delete m;
       break;
-    case Event::CONNECT_REJECT:
-      _s_connect_reject();
+    }
+
+    case Event::REJECT_CONNECTION_REQUEST:
+    {
+
       break;
-    case Event::CHAT_MESSAGE:
-      _s_chat_message();
+    }
+
+    case Event::SEND_CHAT_MESSAGE:
+    {
+      auto itr = std::ranges::find(_s_connections, _s_current_id, _Projection);
+
+      auto* m = new UdpMessage_ChatMessage { ChatMessage { _s_me, Buffer::ChatMessage::_s_buffer } };
+      itr->get_chat().emplace(_s_me, Buffer::ChatMessage::_s_buffer);
+
+      std::cout << "address: " << itr->get_address() << std::endl;
+      _s_sender.send(itr->get_address(), m);
+      delete m;
+
+      Buffer::ChatMessage::_s_buffer[0] = 0;
       break;
+    }
 
     default:
       break;
@@ -106,66 +183,66 @@ private:
     _s_event = Event::NONE;
   }
 
-  static void _s_login() { _s_me.init(_s_buffer_username, _s_buffer_psw); }
-  
-  static void _s_login_anonymous()
-  {
-    std::memcpy(_s_buffer_username, "ANONYMOUS", 10);
-    /* need to generate an unique password */
-    _s_login();
-  }
-
-  static void _s_connect()
-  {
-    Address address { _s_buffer_ip_address, static_cast<u_short>(std::strtoul(_s_buffer_port, nullptr, 0)) };
-    _s_sender.send_connect(address);
-  }
-
-  static void _s_connect_reject()
-  {
-
-  }
-  static void _s_connect_accept()
-  {
-
-  }
-
-  static void _s_chat_message()
-  {
-
-  }
-
   static void _s_update()
   {
-    // _s_receiver.receive();
+    UdpMessage* m = _s_receiver.receive();
+    Address sender_addr = _s_receiver.get_address();
+    
+    switch(m->get_type()._m_t)
+    {
+    case UdpMessage::Type::NONE:
+      break;
+
+    case UdpMessage::Type::CONNECTION_REQUEST:
+      _s_incoming_connection_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
+      _s_incoming_connection_requests.back().get_address().set_ip_address(sender_addr);
+      break;
+    
+    case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
+    {
+      auto id = static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_user().get_id();
+      auto itr = std::ranges::find(_s_outgoing_connection_requests, id, _Projection);
+
+      itr->set_state(ConnectionRequest::State::ACCEPTED);
+      itr->get_address().set_ip_address(sender_addr);
+      static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_address().set_ip_address(sender_addr);
+
+      std::cout << "here !! " << itr->get_address() << std::endl;
+      // logger << itr->get_address() << "\n";
+      _s_connections.emplace_back(*static_cast<UdpMessage_ConnectionRequest_Accepted*>(m));
+      break;
+    }
+    
+    case UdpMessage::Type::CONNECTION_REQUEST_REJECTED:
+      break;
+    
+    case UdpMessage::Type::CHAT_MESSAGE:
+    {
+      auto id = static_cast<UdpMessage_ChatMessage*>(m)->get_sender().get_id();
+      auto itr = std::ranges::find(_s_connections, id, _Projection);
+
+      itr->get_chat().emplace(static_cast<ChatMessage>(*static_cast<UdpMessage_ChatMessage*>(m)));
+      break;
+    }
+    
+    case UdpMessage::Type::PING:
+      break;
+
+    default:
+      break;
+    }
+    
   }
 
 public:
-  
-
-  static const User& get_me() { return _s_me; }
-  static const std::set<Connection>& get_connections() { return _s_connections; }
-
-  static char* get_buffer_username() { return _s_buffer_username; }
-  static char* get_buffer_psw() { return _s_buffer_psw; }
-
-  static char* get_buffer_ip_address() { return _s_buffer_ip_address; }
-  static char* get_buffer_port() { return _s_buffer_port; }
-
-  static char* get_buffer_message() { return _s_buffer_message; }
-
-  static const int buffer_username_length = _S_username_psw_buffer_length;
-  static const int buffer_psw_length = _S_username_psw_buffer_length;
-
-  static const int buffer_ip_address_length = _S_ip_address_buffer_length;
-  static const int buffer_port_length = _S_port_buffer_length;
-
-  static const int buffer_message_length = _S_message_buffer_length;
 
   static void init()
   {
-    _s_init_buffers();
-    _s_init();
+    _s_sender.init();
+    _s_receiver.init();
+
+    Buffer::_s_init();
+    Buffer::_s_clear();
   }
 
   static void update()
@@ -174,36 +251,39 @@ public:
     _s_update();
   }
 
-  static void set_event(Event event)
-  {
-    logger << "set_event: " << event << "\n";
-    _s_event = event;
-  }
   
-  static State get_state() { return _s_state; }
+  static State  get_state() { return _s_state; }
   
+  static void   set_event(Event event) { _s_event = event; }
+  
+  static void   set_id(const String& id) { _s_current_id = id; }
+  
+
   AppBackend() = delete;
   ~AppBackend() = delete;
 
 };
 
-char* AppBackend::_s_buffer_username { nullptr };
-char* AppBackend::_s_buffer_psw { nullptr };
+char* AppBackend::Buffer::UserName::_s_buffer { nullptr };
+char* AppBackend::Buffer::Password::_s_buffer { nullptr };
 
-char* AppBackend::_s_buffer_ip_address { nullptr };
-char* AppBackend::_s_buffer_port { nullptr };
+char* AppBackend::Buffer::IpAddress::_s_buffer { nullptr };
+char* AppBackend::Buffer::Port::_s_buffer { nullptr };
 
-char* AppBackend::_s_buffer_message { nullptr };
+char* AppBackend::Buffer::ChatMessage::_s_buffer { nullptr };
 
 Event AppBackend::_s_event { Event::NONE };
+String AppBackend::_s_current_id {};
 
 AppBackend::State AppBackend::_s_state { AppBackend::State::NOT_LOGGED_IN };
 
 User AppBackend::_s_me {};
-
 UdpSender AppBackend::_s_sender {};
 UdpReceiver AppBackend::_s_receiver {};
 
-std::set<Connection> AppBackend::_s_connections {};
+std::vector<Connection> AppBackend::_s_connections {};
 
+std::vector<ConnectionRequest> AppBackend::_s_incoming_connection_requests;
+std::vector<ConnectionRequest> AppBackend::_s_outgoing_connection_requests;
+ 
 #endif

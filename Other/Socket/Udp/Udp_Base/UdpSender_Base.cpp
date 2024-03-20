@@ -22,8 +22,8 @@ public:
   void init() { _m_init(); }
   void destroy() { _m_destroy(); }
 
-  using Udp_Base::port;
-  using Udp_Base::buffer;
+  using Udp_Base::get_port;
+  using Udp_Base::get_buffer;
 
   using Udp_Base::buffer_size;
   
@@ -34,6 +34,7 @@ public:
   using Udp_Base::    reset_offset;
   using Udp_Base::increment_offset;
 
+  
   void send(const Address_Base& receiver_addr)
   {
     assert(_m_is_initialized);
@@ -60,8 +61,8 @@ public:
     
     if(ret == SOCKET_ERROR)
     {
-      _s_UdpSender_Base_Logger << "error " << WSAGetLastError() << "\n";
-      // assert(WSAGetLastError() == WSAEWOULDBLOCK);
+      _s_UdpSender_Base_Logger << "WSAError: " << WSAGetLastError() << "\n";
+      assert(WSAGetLastError() == WSAEWOULDBLOCK);
     }
   }
 };

@@ -10,7 +10,8 @@
 
 /* Platform dependent */
 
-static const u_short _S_Port = htons(22222);
+// static const u_short _S_Port = htons(22222);
+static const u_short _S_Port = 0;
 
 class Udp_Base
 {
@@ -19,16 +20,18 @@ public:
   static const int _S_buffer_size = 40000;
 
   bool      _m_is_initialized { false };
-  SOCKET    _m_socket;
-  Address_Base _m_socket_addr;
-  void*     _m_buffer;
+  
+  SOCKET        _m_socket;
+  Address_Base  _m_socket_addr;
+  
+  char*     _m_buffer;
   int       _m_offset;
-
+  
   void _m_init()
   {
     if(_m_is_initialized) { return; }
 
-    WindowsSocketsApi::Startup();
+    WindowsSocketsApi::init();
 
     _m_buffer = new char [_S_buffer_size];
     // _m_len = 0;
@@ -62,12 +65,12 @@ public:
       assert(ret != SOCKET_ERROR);
 
       _m_is_initialized = false;
-      WindowsSocketsApi::Cleanup();
+      WindowsSocketsApi::destroy();
     }
   }
 
-  u_short port() const { assert(_m_is_initialized); return _m_socket_addr.port(); }
-  void* buffer() { assert(_m_is_initialized); return _m_buffer; }
+  u_short get_port() const { assert(_m_is_initialized); return _m_socket_addr.get_port(); }
+  char* get_buffer() { assert(_m_is_initialized); return _m_buffer; }
 
   static int buffer_size() { return _S_buffer_size; }
   

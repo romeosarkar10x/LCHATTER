@@ -17,9 +17,12 @@ class TimePoint
   tm*       _m_localtime { nullptr };
   bool      _m_localtime_is_valid { false };
 
+  friend std::ostream& operator<<(std::ostream& o, const TimePoint& timepoint);
+
 public:
   TimePoint(int) {}
   TimePoint() { GetSystemTimeAsFileTime(&_m_filetime); }
+    // std::cout << *this << "\x1b[32m.TimePoint()\x1b[m" << std::endl;
 
   TimePoint(const TimePoint& rhs) :
   _m_filetime { rhs._m_filetime },
@@ -27,6 +30,7 @@ public:
   _m_time_is_valid { rhs._m_time_is_valid },
   _m_localtime_is_valid { rhs._m_localtime_is_valid }
   {
+    // std::cout << *this << "\x1b[32m.TimePoint(const TimePoint&\x1b[m " << rhs << "\x1b[32m);\x1b[m" << std::endl;
     if(_m_localtime_is_valid)
     {
       _m_localtime = new tm;
@@ -40,22 +44,28 @@ public:
   _m_time_is_valid { rhs._m_time_is_valid },
   _m_localtime { std::exchange(rhs._m_localtime, nullptr) },
   _m_localtime_is_valid { rhs._m_localtime_is_valid } {}
+  // {
+  //   std::cout << "\x1b[32mTimePoint\x1b[m" << *this << " \x1b[32m(TimePoint&&\x1b[m " << rhs << "\x1b[32m]);\x1b[m" << std::endl;
+  // }
 
   TimePoint& operator=(const TimePoint& rhs)
   {
+    // std::cout << *this << "\x1b[32mTimePoint& operator=(const TimePoint&\x1b[m " << rhs << "\x1b[32m);\x1b[m" << std::endl;
     TimePoint copy = rhs;
     swap(copy);
     return *this;
   }
 
-  TimePoint& operator=(TimePoint&& rhs)
+  TimePoint& operator=(TimePoint&& rhs) noexcept
   {
+    // std::cout << "no no" << std::endl;
     swap(rhs);
     return *this;
   }
 
   void swap(TimePoint& rhs) noexcept
   {
+    // std::cout << *this << "\x1b[32m.swap(TimePoint&&\x1b[m " << rhs << "\x1b[32m]);\x1b[m" << std::endl;
     std::swap(_m_filetime, rhs._m_filetime);
     std::swap(_m_time, rhs._m_time);
     std::swap(_m_time_is_valid, rhs._m_time_is_valid);
@@ -65,9 +75,11 @@ public:
 
   ~TimePoint()
   {
+    // std::cout << *this << "\x1b[32m.~TimePoint()\x1b[m" << std::endl;
     if(_m_localtime != nullptr)
     {
       delete _m_localtime;
+      _m_localtime_is_valid = false;
       _m_localtime = nullptr;
     }
   }
@@ -89,7 +101,7 @@ public:
   {
     if(_m_localtime_is_valid) { return _m_localtime; }
     if(_m_localtime == nullptr) { const_cast<TimePoint*>(this)->_m_localtime = new tm; }
-    
+
     static_cast<void>(const_cast<TimePoint*>(this)->time());
     tm* localtime = std::localtime(&_m_time);
 
@@ -106,15 +118,15 @@ public:
     _m_localtime_is_valid = false;
   }
 
-  int serialize(void* buffer) const
+  int serialize(char* buffer) const
   {
     std::memcpy(buffer, &_m_filetime, sizeof(FILETIME));
     return sizeof(FILETIME);
   }
 
-  int serialize(void* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+  int serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
 
-  int deserialize(const void* buffer)
+  int deserialize(const char* buffer)
   {
     std::memcpy(&_m_filetime, buffer, sizeof(FILETIME));
 
@@ -124,9 +136,16 @@ public:
     return sizeof(FILETIME);
   }
 
-  int deserialize(const void* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
+  int deserialize(const char* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 
-  bool operator<(const TimePoint& rhs) const { return reinterpret_cast<const long long*>(&_m_filetime) < reinterpret_cast<const long long*>(&rhs._m_filetime); }
+  bool operator<(const TimePoint& rhs) const
+  {
+    if(_m_filetime.dwHighDateTime == rhs._m_filetime.dwHighDateTime) {
+      return (_m_filetime.dwLowDateTime < rhs._m_filetime.dwLowDateTime); 
+    };
+
+    return  (_m_filetime.dwHighDateTime < rhs._m_filetime.dwHighDateTime);
+  }
 };
 
 std::ostream& operator<<(std::ostream& o, const TimePoint& timepoint)
@@ -136,5 +155,12 @@ std::ostream& operator<<(std::ostream& o, const TimePoint& timepoint)
   return o;
 }
 
+// std::ostream& operator<<(std::ostream& o, const TimePoint& timepoint)
+// {
+//   o << " \x1b[1;31m" << reinterpret_cast<const void*>(&timepoint) << "\x1b[m {\n  _m_time: " << timepoint._m_time << ", _m_time_is_valid: " << timepoint._m_time_is_valid
+//     << ", _m_localtime: " << timepoint._m_localtime << ", _m_localtime_is_valid: " << timepoint._m_localtime_is_valid << "\n}";
+  
+//   return o;
+// }
 
 #endif

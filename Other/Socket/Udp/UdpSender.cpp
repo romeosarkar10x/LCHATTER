@@ -1,67 +1,57 @@
 #ifndef UDP_SENDER_CPP
 #define UDP_SENDER_CPP
 
-#include "UdpMessage/UdpMessage_ChatMessage.cpp"
+#include "AppSignature.cpp"
 #include "Udp_Base/UdpSender_Base.cpp"
-#include "AppConfig.cpp"
 
-
+#include "UdpMessage/UdpMessage.cpp"
+#include "UdpMessage/UdpMessage_ChatMessage.cpp"
+#include "UdpMessage/UdpMessage_ConnectionRequest.cpp"
+#include "UdpMessage/UdpMessage_ConnectionRequest_Accepted.cpp"
+#include "UdpMessage/UdpMessage_ConnectionRequest_Rejected.cpp"
+#include "UdpMessage/UdpMessage_Ping.cpp"
 
 class UdpSender final : private UdpSender_Base
 {
-  static const int _S_Offset = sizeof(_S_Signature);
+
 public:
   void init()
   {
     UdpSender_Base::init();
-    std::memcpy(buffer(), _S_Signature, _S_Signature_Length); 
-  }
-
-  void send_connect(const Address& receiver)
-  {
-
-  }
-
-
-  void send_connect_accept(const Address& receiver)
-  {
-
   }
   
-  void send_connect_reject(const Address& receiver)
+  void send(const Address& receiver, const UdpMessage* m)
   {
+    int offset = 0;
 
-  }
-
-  void send_ping(const Address& receiver)
-  {
+    offset += AppSignature::serialize(get_buffer(), offset);
+    offset += m->get_type().serialize(get_buffer(), offset);
     
-  }
-
-  void send_chat_message(const Address& receiver, const ChatMessage& message)
-  {
-    // reset_offset();
-
-    // _m_write_signature();
-    // _m_write_message_type(UdpMessage::Type::CHAT_MESSAGE);
+    switch(m->get_type()._m_t)
+    {
+    case UdpMessage::Type::CONNECTION_REQUEST:
+      offset += static_cast<const UdpMessage_ConnectionRequest*>(m)->serialize(get_buffer(), offset);
+      break;
+    case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
+      offset += static_cast<const UdpMessage_ConnectionRequest_Accepted*>(m)->serialize(get_buffer(), offset);
+      break;
+    case UdpMessage::Type::CONNECTION_REQUEST_REJECTED:
+      // offset += static_cast<UdpMessage_ConnectionRequest_Rejected*>(m)->serialize(get_buffer(), offset);
+      break;
+    case UdpMessage::Type::CHAT_MESSAGE:
+      offset += static_cast<const UdpMessage_ChatMessage*>(m)->serialize(get_buffer(), offset);
+      break;
+    default:
+      break;
+    }
     
-    // std::memcpy(static_cast<char*>(buffer()) + get_offset(), message.buffer(), message.length());
-    // increment_offset(message.length());
-    // send(receiver);
-  }
+    reset_offset();
+    increment_offset(offset);
 
-  void _m_write_signature()
-  {
-    void* p = reinterpret_cast<char*>(buffer()) + get_offset();
-    memcpy(p, _S_Signature, _S_Signature_Length);
-    increment_offset(_S_Signature_Length);
-  }
+    // std::cout << "receiver: " << receiver << std::endl;
+    // logger << receiver << "\n";
 
-  void _m_write_message_type(UdpMessage::Type type)
-  {
-    void* p = reinterpret_cast<char*>(buffer()) + get_offset();
-    *reinterpret_cast<UdpMessage*>(p) = type;
-    increment_offset(static_cast<int>(sizeof(UdpMessage::Type)));
+    UdpSender_Base::send(receiver);
   }
 };
 

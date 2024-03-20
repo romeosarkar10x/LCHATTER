@@ -1,20 +1,19 @@
-#include "User.cpp"
-#include "Address.cpp"
-#include "TimePoint.cpp"
-#include "../Chat/Chat.cpp"
+#include "ConnectionRequest.cpp" /// <winsock2.h>
+#include "../Chat/Chat.cpp" /// <windows.h>
 
-class Connection
+class Connection : public ConnectionRequest
 {
-  User      _m_user;
-  Chat      _m_chat;
-  Address   _m_address;
-  TimePoint _m_timepoint;
+  Chat      _m_chat {};
+  TimePoint _m_last_message {};
 
 public:
+  
+  Connection(ConnectionRequest& r) :
+  ConnectionRequest { r } {}
 
-  const User& user() { return _m_user; }
-  const Chat& chat() { return _m_chat; }
-  const Address& address() { return _m_address; }
-  const TimePoint& timepoint() { return _m_timepoint; }
+  const Chat&       get_chat() const { return _m_chat; }
+  Chat&             get_chat() { return _m_chat; }
+  
+  const TimePoint&  get_timepoint_last_message() const { return _m_last_message; }
 };
 

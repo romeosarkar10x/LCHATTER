@@ -5,7 +5,7 @@
 
 int main()
 {
-  String str { "hola" };
+  String str { "" };
 
   auto digest = MD5_Hash::calculate_digest(str);
   std::cout << digest << "\n";

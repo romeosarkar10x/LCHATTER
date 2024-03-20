@@ -9,10 +9,10 @@ enum class Event : unsigned char
   LOGIN,
   LOGIN_ANONYMOUS,
   LOGOUT,
-  CHAT_MESSAGE,
-  CONNECT,
-  CONNECT_ACCEPT,
-  CONNECT_REJECT
+  SEND_CHAT_MESSAGE,
+  SEND_CONNECTION_REQUEST,
+  ACCEPT_CONNECTION_REQUEST,
+  REJECT_CONNECTION_REQUEST
 };
 
 std::ostream& operator<<(std::ostream& o, Event e)
@@ -20,31 +20,31 @@ std::ostream& operator<<(std::ostream& o, Event e)
   switch(e)
   {
   case Event::NONE:
-    o << "NONE";
+    o << "Event::NONE";
     break;
   case Event::LOGIN:
-    o << "LOGIN";
+    o << "Event::LOGIN";
     break;
   case Event::LOGIN_ANONYMOUS:
-    o << "LOGIN_ANONYMOUS";
+    o << "Event::LOGIN_ANONYMOUS";
     break;
   case Event::LOGOUT:
-    o << "LOGOUT";
+    o << "Event::LOGOUT";
     break;
-  case Event::CHAT_MESSAGE:
-    o << "MESSAGE";
+  case Event::SEND_CHAT_MESSAGE:
+    o << "Event::SEND_CHAT_MESSAGE";
     break;
-  case Event::CONNECT:
-    o << "CONNECT";
+  case Event::SEND_CONNECTION_REQUEST:
+    o << "Event::SEND_CONNECTION_REQUEST";
     break;
-  case Event::CONNECT_ACCEPT:
-    o << "CONNECT_ACCEPT";
+  case Event::ACCEPT_CONNECTION_REQUEST:
+    o << "Event::ACCEPT_CONNECTION_REQUEST";
     break;
-  case Event::CONNECT_REJECT:
-    o << "CONNECT_REJECT";
+  case Event::REJECT_CONNECTION_REQUEST:
+    o << "Event::REJECT_CONNECTION_REQUEST";
     break;
   default:
-    o << "EVENT_NOT_LISTED";
+    o << "Event::ERROR::EVENT_NOT_LISTED";
   }
 
   return o;

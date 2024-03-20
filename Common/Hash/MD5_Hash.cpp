@@ -105,15 +105,14 @@ public:
       a += a_curr, b += b_curr, c += c_curr, d += d_curr;
     }
     
-    u_int* digest_buffer = new u_int[4];
-    digest_buffer[0] = a, digest_buffer[1] = b, digest_buffer[2] = c, digest_buffer[3] = d;
-    MD5_Digest digest { digest_buffer };
-
-    delete [] reinterpret_cast<char*>(tmp);
-    delete [] digest_buffer;
+    MD5_Digest digest {};
     
+    u_int* digest_buffer = reinterpret_cast<u_int*>(digest._m_buffer);
+    digest_buffer[0] = a, digest_buffer[1] = b, digest_buffer[2] = c, digest_buffer[3] = d;
+
+    delete [] reinterpret_cast<char*>(tmp);    
     return digest;
   }
   
-  static MD5_Digest calculate_digest(const String& str) { return calculate_digest(str.buffer(), str.length()); }
+  static MD5_Digest calculate_digest(const String& str) { return calculate_digest(str.get_buffer(), str.get_length()); }
 };

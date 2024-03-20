@@ -2,9 +2,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include <iostream>
-#include <windows.h>
-
 typedef unsigned long long u_long_long;
 
 class TimePoint

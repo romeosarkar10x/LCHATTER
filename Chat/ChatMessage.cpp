@@ -3,7 +3,7 @@
 
 #include "../Common/String.cpp"
 #include "../Common/User.cpp"
-#include "../Common/TimePoint.cpp"
+#include "../Common/TimePoint.cpp" /// <windows.h>
 
 class ChatMessage
 {
@@ -12,7 +12,9 @@ class ChatMessage
   TimePoint _m_timepoint {};
 
 public:
-  ChatMessage() = delete;
+  ChatMessage() = default;
+
+  ChatMessage(const ChatMessage&) = default;
   
   /* need to handle all cases, where sender is [ rvalue | lvalue ], message is [ rvalue | lvalue ], ... */
   
@@ -20,13 +22,13 @@ public:
   _m_sender { sender },
   _m_text { message } {}
 
-  const User& get_sender() const { return _m_sender; }
-  const String& get_text() const { return _m_text; }
-  const TimePoint& get_time() const { return _m_timepoint; }
+  const String&     get_text() const { return _m_text; }
+  const TimePoint&  get_time() const { return _m_timepoint; }
+  const User&       get_sender() const { return _m_sender; }
 
   bool operator<(ChatMessage& rhs) { return _m_timepoint < rhs._m_timepoint; }
   
-  int serialize(void* buffer)
+  int serialize(char* buffer) const
   {
     int offset = 0;
 
@@ -37,9 +39,9 @@ public:
     return offset;
   }
 
-  int serialize(void* buffer, int offset) { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+  int serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
 
-  int deserialize(const void* buffer)
+  int deserialize(const char* buffer)
   {
     int offset = 0;
 
@@ -50,7 +52,7 @@ public:
     return offset;
   }
 
-  int deserialize(const void* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
+  int deserialize(const char* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 };
 
 std::ostream& operator<<(std::ostream& __o, const ChatMessage& chat_message)
