@@ -33,6 +33,7 @@ LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(IMPLOT_DIR)
 CXXFLAGS += -g -Wall -Wformat
+# CXXFLAGS += -O3 -Wall -Wformat
 LIBS =
 
 ##---------------------------------------------------------------------
@@ -118,7 +119,7 @@ $(OBJ_DIR)/%.o:$(IMPLOT_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 all: $(EXE)
-	@echo Build complete for $(ECHO_MESSAGE)
+	@echo Build complete for $(ECHO_MESSAGE) && cp LChatter.exe .rough/a.exe
 
 $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)

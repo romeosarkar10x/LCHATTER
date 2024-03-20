@@ -68,9 +68,9 @@ public:
 
     // Setup Dear ImGui style
     ImGuiStyle &style = ImGui::GetStyle();
-    ImVec4 *colors = style.Colors;
+    // ImVec4 *colors = style.Colors;
 
-    SetTheme(colors, "dracula");
+    // SetTheme(colors, "dracula");
     // SetTheme(colors, "neon");
     // SetTheme(colors, "monokai");
     // SetTheme(colors, "cyberpunk");

@@ -2,6 +2,7 @@
 
 int main()
 {
+  FreeConsole();
   App chatApp;
   chatApp.Run();
   return 0;
