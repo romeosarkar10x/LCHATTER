@@ -6,15 +6,15 @@
 
 #include <cstdlib>
 
-#include "../Log/Logger.cpp"
 
-#include "../App/Event.cpp"
-#include "../Common/User.cpp"
-#include "../Common/Address.cpp"
-#include "../Common/Connection.cpp"
+#include "App/Event.cpp"
+#include "Common/User.cpp"
+#include "Common/Address.cpp" /// <winsock2.h>
+#include "Common/Connection.cpp"
+#include "File/Logger.cpp" /// <windows.h>
 
-#include "../Other/Socket/Udp/UdpSender.cpp"
-#include "../Other/Socket/Udp/UdpReceiver.cpp"
+#include "Other/Socket/Udp/UdpSender.cpp"
+#include "Other/Socket/Udp/UdpReceiver.cpp"
 
 class AppBackend
 {
@@ -25,59 +25,85 @@ public:
     LOGGED_IN,
   };
 
-  struct Buffer
+  class Buffer
   {
-    struct UserName
+    template<class _T>
+      class Buffer_Mixin /// CRTP
+      {
+      public:
+        Buffer_Mixin() = delete;
+        ~Buffer_Mixin() = delete;
+
+        static int    get_buffer_size() { return _T::_S_buffer_size; }
+        static char*  get_buffer() { assert(_T::_s_buffer != nullptr); return _T::_s_buffer; }
+
+        static void init() { if(_T::_s_buffer == nullptr) { _T::_s_buffer = new char [_T::_S_buffer_size]; } }
+        static void clear() { if(_T::_s_buffer != nullptr) { _T::_s_buffer[0] = 0; } }
+        static void destroy() { if(_T::_s_buffer != nullptr) { delete [] _T::_s_buffer; _T::_s_buffer = nullptr; } }
+
+      };
+
+  public:
+    class Username : public Buffer_Mixin<Username>
     {
-      static const int _S_buffer_size = 100;
-      static char* _s_buffer;
+      friend class Buffer_Mixin<Username>;
+      static const int  _S_buffer_size = 20;
+      static char*      _s_buffer;
     };
 
-    struct Password
+    class Password : public Buffer_Mixin<Password>
     {
-      static const int _S_buffer_size = 100;
-      static char* _s_buffer;
+      friend class Buffer_Mixin<Password>;
+      static const int  _S_buffer_size = 20;
+      static char*      _s_buffer;
     };
     
-    struct IpAddress
+    class IpAddress : public Buffer_Mixin<IpAddress>
     {
-      static const int _S_buffer_size = 20; 
-      static char* _s_buffer;
+      friend class Buffer_Mixin<IpAddress>;
+      static const int  _S_buffer_size = 20; 
+      static char*      _s_buffer;
     };
     
-    struct Port
+    class Port : public Buffer_Mixin<Port>
     {
-      static const int _S_buffer_size = 10;
-      static char* _s_buffer;
+      friend class Buffer_Mixin<Port>;
+      static const int  _S_buffer_size = 10;
+      static char*      _s_buffer;
     };
     
-    struct ChatMessage
+    class ChatMessage : public Buffer_Mixin<ChatMessage>
     {
-      static const int _S_buffer_size = 40000;
-      static char* _s_buffer;
+      friend class Buffer_Mixin<ChatMessage>;
+      static const int  _S_buffer_size = 4000;
+      static char*      _s_buffer;
     };
     
-    static void _s_init()
+    static void init()
     {
-      UserName::_s_buffer = new char [UserName::_S_buffer_size];
-      Password::_s_buffer = new char [Password::_S_buffer_size];
-
-      IpAddress::_s_buffer = new char [IpAddress::_S_buffer_size];
-      Port::_s_buffer = new char [Port::_S_buffer_size];
-
-      ChatMessage::_s_buffer = new char[ChatMessage::_S_buffer_size];
-      assert(ChatMessage::_s_buffer != nullptr);
+      Username    ::init();
+      Password    ::init();
+      IpAddress   ::init();
+      Port        ::init();
+      ChatMessage ::init();
     }
 
-    static void _s_clear()
+    static void clear()
     {
-      UserName::_s_buffer[0] = 0;
-      Password::_s_buffer[0] = 0;
+      Username    ::clear();
+      Password    ::clear();
+      IpAddress   ::clear();
+      Port        ::clear();
+      ChatMessage ::clear();
+    }
 
-      IpAddress::_s_buffer[0] = 0;
-      Port::_s_buffer[0] = 0;
-      
-      ChatMessage::_s_buffer[0] = 0;
+    static void destroy()
+    {
+      Username    ::destroy();
+      Password    ::destroy();
+      IpAddress   ::destroy();
+      Port        ::destroy();
+      ChatMessage ::destroy();
     }
   };
 
@@ -85,8 +111,7 @@ public:
   static String _s_current_id;
   static constexpr auto _Projection = [] (const ConnectionRequest& c) -> const String& { return c.get_user().get_id(); };
 
-  static State _s_state;
-
+  static State _s_app_state;
 
   static User         _s_me;
   static UdpSender    _s_sender;
@@ -98,26 +123,26 @@ public:
   static std::vector<Connection> _s_connections;
   
 private:
-  static void _s_handle_event()
+  static void _s_handle_events()
   {
     if(_s_event != Event::NONE) { logger << _s_event << "\n"; }
 
     switch(_s_event)
     {
     case Event::LOGIN_ANONYMOUS:
-      std::memcpy(Buffer::UserName::_s_buffer, "ANONYMOUS_USER", 15);
+      std::memcpy(Buffer::Username::get_buffer(), "ANONYMOUS_USER", 15);
       /* need to generate an unique password */
       // fall
 
     case Event::LOGIN:
       // Error Check ...
-      _s_me.init(Buffer::UserName::_s_buffer, Buffer::Password::_s_buffer);
-      _s_state = State::LOGGED_IN;
+      _s_me.init(Buffer::Username::get_buffer(), Buffer::Password::get_buffer());
+      _s_app_state = State::LOGGED_IN;
       break;
 
     case Event::SEND_CONNECTION_REQUEST:
     {
-      Address receiver { Buffer::IpAddress::_s_buffer, static_cast<u_short>(std::strtoul(Buffer::Port::_s_buffer, nullptr, 0)) };
+      Address receiver { Buffer::IpAddress::get_buffer(), static_cast<u_short>(std::strtoul(Buffer::Port::get_buffer(), nullptr, 0)) };
       _s_outgoing_connection_requests.emplace_back(User {}, receiver);
       
       auto* m = new UdpMessage_ConnectionRequest {
@@ -131,14 +156,7 @@ private:
 
     case Event::ACCEPT_CONNECTION_REQUEST:
     {
-      // std::cout << "Current Id: " << _s_current_id << &_s_current_id << std::endl;
-      // std::cout << &(_s_incoming_connection_requests[0].get_user().get_id()) << std::endl;
-      // std::cout << _s_incoming_connection_requests.size() << std::endl;
-      // for(const auto& r : _s_incoming_connection_requests) { std::cout << r.get_user().get_id() << " " << &r.get_user().get_id() << std::endl; }
-      
       auto itr = std::ranges::find(_s_incoming_connection_requests, _s_current_id, _Projection);
-      
-      // std::cout << "HERE" << std::endl;
       assert(itr != _s_incoming_connection_requests.end());
       
       Address receiver_addr { itr->get_address() };
@@ -165,14 +183,13 @@ private:
     {
       auto itr = std::ranges::find(_s_connections, _s_current_id, _Projection);
 
-      auto* m = new UdpMessage_ChatMessage { ChatMessage { _s_me, Buffer::ChatMessage::_s_buffer } };
-      itr->get_chat().emplace(_s_me, Buffer::ChatMessage::_s_buffer);
+      auto* m = new UdpMessage_ChatMessage { ChatMessage { _s_me, Buffer::ChatMessage::get_buffer() } };
+      itr->get_chat().emplace(_s_me, Buffer::ChatMessage::get_buffer());
 
-      std::cout << "address: " << itr->get_address() << std::endl;
       _s_sender.send(itr->get_address(), m);
       delete m;
 
-      Buffer::ChatMessage::_s_buffer[0] = 0;
+      Buffer::ChatMessage::clear();
       break;
     }
 
@@ -207,8 +224,6 @@ private:
       itr->get_address().set_ip_address(sender_addr);
       static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_address().set_ip_address(sender_addr);
 
-      std::cout << "here !! " << itr->get_address() << std::endl;
-      // logger << itr->get_address() << "\n";
       _s_connections.emplace_back(*static_cast<UdpMessage_ConnectionRequest_Accepted*>(m));
       break;
     }
@@ -241,41 +256,37 @@ public:
     _s_sender.init();
     _s_receiver.init();
 
-    Buffer::_s_init();
-    Buffer::_s_clear();
+    Buffer::init();
+    Buffer::clear();
   }
 
   static void update()
   {
-    _s_handle_event();
+    _s_handle_events();
     _s_update();
   }
 
   
-  static State  get_state() { return _s_state; }
-  
+  static State  get_app_state() { return _s_app_state; }
+
   static void   set_event(Event event) { _s_event = event; }
-  
   static void   set_id(const String& id) { _s_current_id = id; }
   
 
   AppBackend() = delete;
   ~AppBackend() = delete;
-
 };
 
-char* AppBackend::Buffer::UserName::_s_buffer { nullptr };
-char* AppBackend::Buffer::Password::_s_buffer { nullptr };
-
-char* AppBackend::Buffer::IpAddress::_s_buffer { nullptr };
-char* AppBackend::Buffer::Port::_s_buffer { nullptr };
-
-char* AppBackend::Buffer::ChatMessage::_s_buffer { nullptr };
+char* AppBackend::Buffer::Username    ::_s_buffer { nullptr };
+char* AppBackend::Buffer::Password    ::_s_buffer { nullptr };
+char* AppBackend::Buffer::IpAddress   ::_s_buffer { nullptr };
+char* AppBackend::Buffer::Port        ::_s_buffer { nullptr };
+char* AppBackend::Buffer::ChatMessage ::_s_buffer { nullptr };
 
 Event AppBackend::_s_event { Event::NONE };
 String AppBackend::_s_current_id {};
 
-AppBackend::State AppBackend::_s_state { AppBackend::State::NOT_LOGGED_IN };
+AppBackend::State AppBackend::_s_app_state { AppBackend::State::NOT_LOGGED_IN };
 
 User AppBackend::_s_me {};
 UdpSender AppBackend::_s_sender {};

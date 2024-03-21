@@ -1,4 +1,5 @@
 *.exe
+*.EXE
 *.bin
 
 *.in
@@ -8,12 +9,11 @@
 *.lib
 *.dll
 
-*.vscode/
 
 *.log
 
 *.o
 *.d
-*.rough
-
 *.ini
+
+*.rough
