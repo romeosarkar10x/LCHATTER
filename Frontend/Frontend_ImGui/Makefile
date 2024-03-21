@@ -125,7 +125,7 @@ $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d
+	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d *.log *.ini
 
 .DEFAULT_GOAL := all
 .PHONY: clean
