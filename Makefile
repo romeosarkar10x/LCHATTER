@@ -1,6 +1,6 @@
 IMGUI_DIR=Frontend/Frontend_ImGui/externals/imgui
 SRC_DIR=Frontend/Frontend_ImGui/src
-OBJ_DIR=Obj
+OBJ_DIR=Objects
 
 EXE=LCHATTER.EXE
 SOURCES=

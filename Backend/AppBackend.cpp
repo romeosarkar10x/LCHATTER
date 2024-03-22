@@ -125,7 +125,7 @@ public:
 private:
   static void _s_handle_events()
   {
-    if(_s_event != Event::NONE) { logger << _s_event << "\n"; }
+    if(_s_event != Event::NONE) { logger << Logger::timestamp << _s_event << Logger::endl; }
 
     switch(_s_event)
     {
