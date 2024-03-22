@@ -1,7 +1,7 @@
 #ifndef UDP_MESSAGE_CPP
 #define UDP_MESSAGE_CPP
 
-#include "../../../../Common/Address.cpp"
+#include "../../Address.cpp"
 
 class UdpMessage
 {

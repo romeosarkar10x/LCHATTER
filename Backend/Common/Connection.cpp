@@ -7,6 +7,7 @@ class Connection : public ConnectionRequest
   TimePoint _m_last_message {};
 
 public:
+  Connection() = default;
   
   Connection(ConnectionRequest& r) :
   ConnectionRequest { r } {}

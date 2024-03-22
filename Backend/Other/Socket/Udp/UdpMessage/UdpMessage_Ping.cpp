@@ -2,7 +2,6 @@
 #define UDP_MESSAGE_PING
 
 #include "UdpMessage.cpp"
-#include "../../../../Common/Address.cpp"
 
 /// not implemented
 

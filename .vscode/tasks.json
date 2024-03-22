@@ -6,7 +6,7 @@
       "command": "C:/msys64/mingw64/bin/mingw32-make.exe",
 
       "options": {
-        "cwd": "${workspaceFolder}/Frontend-ImGui"
+        "cwd": "${workspaceFolder}"
       }
     }
   ],

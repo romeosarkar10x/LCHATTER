@@ -1,6 +1,6 @@
 #include <iostream>
-#include "../Upgrade/String.cpp"
-#include "../External/trace_bytes/trace_bytes.hpp"
+#include "../Common/String.cpp"
+#include "../../Externals/trace_bytes/trace_bytes.hpp"
 
 
 int main()
@@ -46,6 +46,16 @@ int main()
   std::cout << "s6: " << s6 << std::endl;
 
   std::cout << "s6 + s6: " << s6 << " + " << s6 << ": " << s6 + s6 << std::endl;
+
+  /// logical operators
+  std::cout << "(s < s2): (" << s << " < " << s2 << "): " << (s < s2) << std::endl;
+  std::cout << "(s < s3): (" << s << " < " << s3 << "): " << (s < s3) << std::endl;
+  std::cout << "(s < s5): (" << s << " < " << s5 << "): " << (s < s5) << std::endl;
+
+  std::cout << "(s4 < s5): (" << s4 << " < " << s5 << "): " << (s4 < s5) << std::endl;
+  std::cout << "(s4 < s6): (" << s4 << " < " << s6 << "): " << (s4 < s6) << std::endl;
+  std::cout << "(s5 < s6): (" << s5 << " < " << s6 << "): " << (s5 < s6) << std::endl;
+  std::cout << "(s6 < s6): (" << s6 << " < " << s6 << "): " << (s6 < s6) << std::endl;
 
   return 0;
 }

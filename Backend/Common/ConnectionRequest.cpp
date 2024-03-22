@@ -2,7 +2,7 @@
 #define CONNECTION_REQUEST_CPP
 
 #include "User.cpp"
-#include "Address.cpp"
+#include "../Other/Socket/Address.cpp"
 #include "TimePoint.cpp"
 
 class ConnectionRequest
@@ -69,7 +69,7 @@ private:
 
 std::ostream& operator<<(std::ostream& o, const ConnectionRequest& r)
 {
-  o << r.get_user() << " " << r.get_address() << " " << r.get_timepoint_last_seen(); return o;
+  o << r.get_user() << " " << r.get_timepoint_last_seen() << " " << r.get_address(); return o;
 }
 
 #endif

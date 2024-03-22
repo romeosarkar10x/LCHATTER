@@ -361,15 +361,15 @@ void App::ShowChatWindow()
       ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y), ImGuiChildFlags_ResizeX);
 
       // Display Port Number
-      char port[6];
-      std::snprintf(port, 6, "%u", AppBackend::_s_receiver.get_port());
+      // char port[6];
+      // std::snprintf(port, 6, "%u", AppBackend::_s_receiver.get_socket_address().get_port());
 
       ImGui::Text(String("Id : ") + AppBackend::_s_me.get_id());
-      ImGui::Text(String("Port : ") + port);
+      ImGui::Text(String("Port : ") + AppBackend::_s_receiver.get_socket_address().get_port());
       if (ImGui::IsItemClicked())
       {
         // Copy the text to the clipboard
-        ImGui::SetClipboardText(port);
+        ImGui::SetClipboardText(AppBackend::_s_receiver.get_socket_address().get_port());
       }
 
       if (ImGui::Button("+"))

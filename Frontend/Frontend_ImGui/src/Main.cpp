@@ -2,7 +2,7 @@
 
 int main()
 {
-  FreeConsole();
+//   FreeConsole();
   App chatApp;
   chatApp.Run();
   return 0;

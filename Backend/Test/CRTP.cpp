@@ -29,7 +29,7 @@ char* IpAddress::_s_buffer { nullptr };
 
 int main()
 {
-  // IpAddress::init();
+  IpAddress::init();
   IpAddress::clear();
 
   std::cout << IpAddress::get_buffer() << "\n";

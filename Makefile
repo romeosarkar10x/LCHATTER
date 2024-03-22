@@ -15,7 +15,7 @@ LINUX_GL_LIBS = -lGL
 
 CXXFLAGS=
 CXXFLAGS+=-std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(IMPLOT_DIR)
-CXXFLAGS+=-O3 -Wall -Wformat -Wextra -Wpedantic -Wconversion -Wunused-variable -Wunused-parameter -Wunused-result
+CXXFLAGS+=-g -Wall -Wformat -Wextra -Wpedantic -Wconversion -Wunused-variable -Wunused-parameter -Wunused-result
 LIBS =
 
 ##---------------------------------------------------------------------

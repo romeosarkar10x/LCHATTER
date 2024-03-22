@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "AppSignature.cpp"
-#include "Udp_Base/UdpReceiver_Base.cpp"
+#include "Udp_BASE/UdpReceiver_BASE.cpp"
 
 #include "UdpMessage/UdpMessage.cpp"
 #include "UdpMessage/UdpMessage_ChatMessage.cpp"
@@ -13,23 +13,19 @@
 #include "UdpMessage/UdpMessage_ConnectionRequest_Rejected.cpp"
 #include "UdpMessage/UdpMessage_Ping.cpp"
 
-class UdpReceiver final : private UdpReceiver_Base
+class UdpReceiver final : private UdpReceiver_BASE
 {
   
 public:
-  using UdpReceiver_Base::get_port;
+  const Address&  get_socket_address() { return UdpReceiver_BASE::get_socket_address(); }
+  const Address&  get_sender_address() { return UdpReceiver_BASE::get_sender_address(); }
   
-  const Address get_address() { return UdpReceiver_Base::get_address(); }
-  
-
-  void init()
-  {
-    UdpReceiver_Base::init();
-  }
+  using UdpReceiver_BASE::init;
+  using UdpReceiver_BASE::destroy;
 
   UdpMessage* receive()
   {
-    if(UdpReceiver_Base::receive() == false) { return new UdpMessage {}; }
+    if(UdpReceiver_BASE::receive() == false) { return new UdpMessage {}; }
     
     int offset = 0;
 
@@ -81,7 +77,8 @@ public:
     default:
       assert(false);
     }
-
+    
+    // std::cout << offset << " " << get_offset() << std::endl;
     assert(offset == get_offset());
     return m;
   }

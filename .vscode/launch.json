@@ -12,7 +12,7 @@
       "program": "${workspaceFolder}/LChatter.exe",
       "args": [],
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/Frontend-ImGui",
+      "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,
       "MIMode": "gdb",

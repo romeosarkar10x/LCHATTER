@@ -9,7 +9,7 @@
 
 #include "App/Event.cpp"
 #include "Common/User.cpp"
-#include "Common/Address.cpp" /// <winsock2.h>
+#include "Other/Socket/Address.cpp" /// <winsock2.h>
 #include "Common/Connection.cpp"
 #include "File/Logger.cpp" /// <windows.h>
 
@@ -125,28 +125,32 @@ public:
 private:
   static void _s_handle_events()
   {
-    if(_s_event != Event::NONE) { logger << Logger::timestamp << _s_event << Logger::endl; }
+    if(_s_event == Event::NONE) { return; }
+
+    logger << Logger::timestamp << "EVENT_BEGIN " << _s_event << Logger::endl;
 
     switch(_s_event)
     {
     case Event::LOGIN_ANONYMOUS:
-      std::memcpy(Buffer::Username::get_buffer(), "ANONYMOUS_USER", 15);
+      Buffer::Username::clear();
+      std::memcpy(Buffer::Username::get_buffer(), "anonymous", 10);
       /* need to generate an unique password */
       // fall
 
     case Event::LOGIN:
       // Error Check ...
       _s_me.init(Buffer::Username::get_buffer(), Buffer::Password::get_buffer());
+      logger << "Username: " << Buffer::Username::get_buffer() << ", Password: " << Buffer::Password::get_buffer() << Logger::endl;
       _s_app_state = State::LOGGED_IN;
       break;
 
     case Event::SEND_CONNECTION_REQUEST:
     {
-      Address receiver { Buffer::IpAddress::get_buffer(), static_cast<u_short>(std::strtoul(Buffer::Port::get_buffer(), nullptr, 0)) };
+      Address receiver { Buffer::IpAddress::get_buffer(), Buffer::Port::get_buffer() };
       _s_outgoing_connection_requests.emplace_back(User {}, receiver);
       
       auto* m = new UdpMessage_ConnectionRequest {
-        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_port() } }
+        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_socket_address() } }
       };
 
       _s_sender.send(receiver, m);
@@ -162,7 +166,7 @@ private:
       Address receiver_addr { itr->get_address() };
 
       auto* m = new UdpMessage_ConnectionRequest_Accepted {
-        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_port() } }
+        ConnectionRequest { User { _s_me }, Address { _s_receiver.get_socket_address() } }
       };
 
       itr->set_state(ConnectionRequest::State::ACCEPTED);
@@ -197,18 +201,21 @@ private:
       break;
     }
 
+    logger << Logger::timestamp << "EVENT_END   " << _s_event << Logger::endl; 
     _s_event = Event::NONE;
   }
 
-  static void _s_update()
+  static void _s_receive()
   {
     UdpMessage* m = _s_receiver.receive();
-    Address sender_addr = _s_receiver.get_address();
+    Address sender_addr = _s_receiver.get_sender_address();
+
+    if(m->get_type()._m_t == UdpMessage::Type::NONE) { return; }
+
+    logger << Logger::timestamp << "RECEIVE_BEGIN " << m->get_type()._m_t << Logger::endl;
     
     switch(m->get_type()._m_t)
     {
-    case UdpMessage::Type::NONE:
-      break;
 
     case UdpMessage::Type::CONNECTION_REQUEST:
       _s_incoming_connection_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
@@ -246,24 +253,33 @@ private:
     default:
       break;
     }
-    
+
+    logger << Logger::timestamp << "RECEIVE_END   " << m->get_type()._m_t << Logger::endl;
   }
 
 public:
 
   static void init()
   {
+    logger << Logger::timestamp << "INIT_BEGIN " << Logger::endl;
+
     _s_sender.init();
     _s_receiver.init();
 
     Buffer::init();
     Buffer::clear();
+
+    logger << Logger::timestamp << "INIT_END   " << Logger::endl;
   }
 
   static void update()
   {
+    logger << Logger::timestamp << "UPDATE_BEGIN " << Logger::endl;
+
     _s_handle_events();
-    _s_update();
+    _s_receive();
+
+    logger << Logger::timestamp << "UPDATE_END   " << Logger::endl;
   }
 
   
@@ -283,14 +299,14 @@ char* AppBackend::Buffer::IpAddress   ::_s_buffer { nullptr };
 char* AppBackend::Buffer::Port        ::_s_buffer { nullptr };
 char* AppBackend::Buffer::ChatMessage ::_s_buffer { nullptr };
 
-Event AppBackend::_s_event { Event::NONE };
-String AppBackend::_s_current_id {};
+Event     AppBackend::_s_event { Event::NONE };
+String    AppBackend::_s_current_id {};
 
 AppBackend::State AppBackend::_s_app_state { AppBackend::State::NOT_LOGGED_IN };
 
-User AppBackend::_s_me {};
-UdpSender AppBackend::_s_sender {};
-UdpReceiver AppBackend::_s_receiver {};
+User          AppBackend::_s_me {};
+UdpSender     AppBackend::_s_sender {};
+UdpReceiver   AppBackend::_s_receiver {};
 
 std::vector<Connection> AppBackend::_s_connections {};
 

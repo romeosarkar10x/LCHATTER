@@ -7,6 +7,6 @@ int main()
 {
   std::vector<Connection> connections;
 
-  connections.emplace_back()
+  connections.emplace_back();
   return 0;
 }

@@ -6,13 +6,16 @@
 enum class Event : unsigned char
 {
   NONE,
+
   LOGIN,
   LOGIN_ANONYMOUS,
   LOGOUT,
+  
   SEND_CHAT_MESSAGE,
+
   SEND_CONNECTION_REQUEST,
   ACCEPT_CONNECTION_REQUEST,
-  REJECT_CONNECTION_REQUEST
+  REJECT_CONNECTION_REQUEST,
 };
 
 std::ostream& operator<<(std::ostream& o, Event e)

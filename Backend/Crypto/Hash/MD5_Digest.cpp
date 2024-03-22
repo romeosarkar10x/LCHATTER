@@ -10,10 +10,10 @@
 
 class MD5_Digest
 {
-  u_char _m_buffer[16];
+  u_char  _m_buffer[16];
   
-  String _m_string;
-  bool _m_is_valid { false };
+  String  _m_string;
+  bool    _m_is_valid { false };
 
   friend MD5_Hash;
 

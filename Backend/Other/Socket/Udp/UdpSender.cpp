@@ -2,7 +2,7 @@
 #define UDP_SENDER_CPP
 
 #include "AppSignature.cpp"
-#include "Udp_Base/UdpSender_Base.cpp"
+#include "Udp_BASE/UdpSender_BASE.cpp"
 
 #include "UdpMessage/UdpMessage.cpp"
 #include "UdpMessage/UdpMessage_ChatMessage.cpp"
@@ -11,15 +11,13 @@
 #include "UdpMessage/UdpMessage_ConnectionRequest_Rejected.cpp"
 #include "UdpMessage/UdpMessage_Ping.cpp"
 
-class UdpSender final : private UdpSender_Base
+class UdpSender final : private UdpSender_BASE
 {
 
 public:
-  void init()
-  {
-    UdpSender_Base::init();
-  }
-  
+  using UdpSender_BASE::init;
+  using UdpSender_BASE::destroy;
+
   void send(const Address& receiver, const UdpMessage* m)
   {
     int offset = 0;
@@ -47,11 +45,7 @@ public:
     
     reset_offset();
     increment_offset(offset);
-
-    // std::cout << "receiver: " << receiver << std::endl;
-    // logger << receiver << "\n";
-
-    UdpSender_Base::send(receiver);
+    UdpSender_BASE::send(receiver);
   }
 };
 
