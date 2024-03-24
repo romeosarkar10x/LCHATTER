@@ -8,7 +8,7 @@
 #include "../../WindowsSocketsApi.cpp"
 #include "../../../../File/Logger.cpp"
 
-/* Platform dependent */
+/// OS Dependent
 
 // static const u_short _S_Port = htons(22222);
 

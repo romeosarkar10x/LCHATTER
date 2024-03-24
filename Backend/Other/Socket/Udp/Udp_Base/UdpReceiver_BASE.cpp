@@ -7,6 +7,8 @@
 #include "../../WindowsSocketsApi.cpp"
 #include "../../../../File/Logger.cpp"
 
+/// OS Dependent
+
 class UdpReceiver_BASE : private Udp_BASE
 {
   static Logger   _s_UdpReceiver_BASE_Logger;

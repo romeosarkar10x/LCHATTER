@@ -36,6 +36,8 @@ public:
   const String& get_name() const { return _m_name; }
   const String& get_id() const { return _m_id.to_string(); }
 
+  bool operator==(const User& rhs) const { return (_m_id == rhs._m_id); }
+
   int serialize(char* buffer) const
   {
     int offset = 0;

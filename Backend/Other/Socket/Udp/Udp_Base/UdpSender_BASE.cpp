@@ -6,6 +6,7 @@
 #include "../UdpMessage/UdpMessage.cpp"
 #include "../../../../File/Logger.cpp"
 
+/// OS Dependent
 
 class UdpSender_BASE : private Udp_BASE
 {

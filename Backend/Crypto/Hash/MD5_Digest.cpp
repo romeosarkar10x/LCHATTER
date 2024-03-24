@@ -73,6 +73,8 @@ public:
     return _m_string;
   }
 
+  bool operator==(const MD5_Digest& rhs) const { return (std::memcmp(_m_buffer, rhs._m_buffer, 16) == 0); }
+
   int serialize(char* buffer) const
   {
     std::memcpy(buffer, _m_buffer, 16);

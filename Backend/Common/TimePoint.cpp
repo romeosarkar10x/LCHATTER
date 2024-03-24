@@ -7,6 +7,11 @@
 #include <cstring>
 #include <utility>
 
+#include "String.cpp"
+
+/// OS Dependent
+
+
 class TimePoint
 {
   FILETIME  _m_filetime;
@@ -84,6 +89,8 @@ public:
     return _m_time;
   }
 
+  void set_time(const TimePoint& rhs) { this->operator=(rhs); }
+
   const tm* get_localtime() const
   {
     if(_m_localtime_is_valid) { return _m_localtime; }
@@ -129,6 +136,12 @@ public:
   {
     if(_m_filetime.dwHighDateTime == rhs._m_filetime.dwHighDateTime) { return (_m_filetime.dwLowDateTime < rhs._m_filetime.dwLowDateTime); };
     return  (_m_filetime.dwHighDateTime < rhs._m_filetime.dwHighDateTime);
+  }
+
+  String to_string_localtime()
+  {
+    auto localtime = get_localtime();
+    return String::to_string(localtime->tm_hour) + ":" + String::to_string(localtime->tm_min) + ":" + String::to_string(localtime->tm_sec);
   }
 };
 

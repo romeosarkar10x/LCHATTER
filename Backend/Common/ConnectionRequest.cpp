@@ -9,7 +9,23 @@ class ConnectionRequest
 {
 
 public:
-  enum State { AWAITING_RESPONSE, ACCEPTED, REJECTED };
+  class State
+  {
+  
+  public:
+    enum Enum_State
+    {
+      AWAITING_RESPONSE,
+      ACCEPTED,
+      REJECTED,
+    };
+
+    Enum_State  get_state() { return _m_state; }
+    void        set_state(Enum_State state) { _m_state = state; }
+    
+  private:
+    Enum_State _m_state { AWAITING_RESPONSE };
+  };
 
   ConnectionRequest() = default;
 
@@ -22,15 +38,15 @@ public:
 
 
   const User&       get_user() const { return _m_user; }
+
   const Address&    get_address() const { return _m_addr; }
   Address&          get_address() { return _m_addr; }
-  const TimePoint&  get_timepoint_last_seen() const { return _m_last_seen; }
 
-  TimePoint&        get_timepoint_last_seen() { return _m_last_seen; }
+  const TimePoint&  get_timepoint() const { return _m_timepoint; }
+  TimePoint&        get_timepoint() { return _m_timepoint; }
 
-  State get_state() { return _m_state; }
-  void  set_state(State state) { _m_state = state; }
-  
+  State::Enum_State get_state() { return _m_state.get_state(); }
+  void              set_state(State::Enum_State state) { _m_state.set_state(state); }
 
   bool operator<(const ConnectionRequest& rhs) { return _m_user.get_id().operator<(rhs._m_user.get_id()); }
 
@@ -40,7 +56,7 @@ public:
 
     offset += _m_user.serialize(buffer, offset);
     offset += _m_addr.serialize(buffer, offset);
-    offset += _m_last_seen.serialize(buffer, offset);
+    offset += _m_timepoint.serialize(buffer, offset);
 
     return offset;
   }
@@ -53,7 +69,7 @@ public:
 
     offset += _m_user.deserialize(buffer, offset);
     offset += _m_addr.deserialize(buffer, offset);
-    offset += _m_last_seen.deserialize(buffer, offset);
+    offset += _m_timepoint.deserialize(buffer, offset);
 
     return offset;
   }
@@ -63,13 +79,13 @@ public:
 private:
   User      _m_user {};
   Address   _m_addr {};
-  State     _m_state { AWAITING_RESPONSE };
-  TimePoint _m_last_seen {};
+  State     _m_state {};
+  TimePoint _m_timepoint {};
 };
 
 std::ostream& operator<<(std::ostream& o, const ConnectionRequest& r)
 {
-  o << r.get_user() << " " << r.get_timepoint_last_seen() << " " << r.get_address(); return o;
+  o << r.get_user() << " " << r.get_timepoint() << " " << r.get_address(); return o;
 }
 
 #endif

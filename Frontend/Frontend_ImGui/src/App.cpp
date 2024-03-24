@@ -128,7 +128,7 @@ void App::Update()
   // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
-  if (AppBackend::get_app_state() == AppBackend::State::NOT_LOGGED_IN)
+  if (AppBackend::State::get_state() == AppBackend::State::NOT_LOGGED_IN)
   {
     ShowLoginWindow();
   }
@@ -211,7 +211,7 @@ void App::ShowLoginWindow()
                            AppBackend::Buffer::Password::get_buffer_size(),
                            ImGuiInputTextFlags_Password | input_text_flags))
       {
-        AppBackend::set_event(Event::LOGIN);
+        AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::LOGIN);
         focus = 0;
       }
 
@@ -223,13 +223,13 @@ void App::ShowLoginWindow()
 
       if (ImGui::Button("LOG IN"))
       {
-        AppBackend::set_event(Event::LOGIN);
+        AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::LOGIN);
       }
 
       ImGui::Text("Anonymous Login");
       if (ImGui::IsItemClicked())
       {
-        AppBackend::set_event(Event::LOGIN_ANONYMOUS);
+        AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::LOGIN_ANONYMOUS);
       }
     }
     ImGui::EndChild();
@@ -245,7 +245,7 @@ void App::AddConnectionWindow()
   if (ImGui::Button("CONNECT"))
   {
     showAddConnectionForm = false;
-    AppBackend::set_event(Event::SEND_CONNECTION_REQUEST);
+    AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::SEND_CONNECTION_REQUEST);
   }
 }
 
@@ -262,11 +262,11 @@ void App::ShowConnectionRequestWindow()
 
   incomingRequests = AppBackend::_s_incoming_connection_requests;
   std::ranges::sort(incomingRequests, std::less<>{},
-                    [](const ConnectionRequest &r) { return r.get_timepoint_last_seen(); });
+                    [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
   outgoingRequests = AppBackend::_s_outgoing_connection_requests;
   std::ranges::sort(outgoingRequests, std::less<>{},
-                    [](const ConnectionRequest &r) { return r.get_timepoint_last_seen(); });
+                    [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
   if (ImGui::Begin("Connection Requests", &showConnectionRequestWindow))
   {
@@ -287,16 +287,17 @@ void App::ShowConnectionRequestWindow()
           if (incomingRequests[i].get_state() == ConnectionRequest::State::AWAITING_RESPONSE &&
               selectedRequestIndex == i)
           {
+            ImGui::Text("Request Time: %s", incomingRequests[i].get_timepoint().to_string_localtime().get_buffer());
             if (ImGui::Button("Accept"))
             {
               AppBackend::set_id(incomingRequests[i].get_user().get_id());
               // std::cout << "id: " << incomingRequests[i].get_user().get_id() << std::endl;
-              AppBackend::set_event(Event::ACCEPT_CONNECTION_REQUEST);
+              AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::ACCEPT_CONNECTION_REQUEST);
               // AcceptConnectionRequest(incomingRequests[i]);
               selectedRequestIndex = -1;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Decline"))
+            if (ImGui::Button("Reject"))
             {
               // DeclineConnectionRequest(incomingRequests[i]);
               selectedRequestIndex = -1;
@@ -318,7 +319,7 @@ void App::ShowConnectionRequestWindow()
       {
         for (int i = 0; i < (int)outgoingRequests.size(); ++i)
         {
-          auto text = outgoingRequests[i].get_address().get_ip_address() + ": Port";
+          auto text = outgoingRequests[i].get_address().to_string();
           ImGui::Text(text);
           // ImGui::PushID(i);
           // if (ImGui::Selectable(outgoingRequests[i].get_address().get_ip_address(), selectedRequestIndex == i))
@@ -459,7 +460,7 @@ void App::ShowChatWindow()
           if (get_buffer()[0] != '\0')
           {
             AppBackend::set_id(connections[selectedConnectionIndex].get_user().get_id());
-            AppBackend::set_event(Event::SEND_CHAT_MESSAGE);
+            AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::SEND_CHAT_MESSAGE);
           }
         };
 
