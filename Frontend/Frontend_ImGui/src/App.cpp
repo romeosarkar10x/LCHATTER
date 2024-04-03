@@ -261,12 +261,10 @@ void App::ShowConnectionRequestWindow()
   ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.3f, 0.3f, 0.6f, 1.0f));   // Darker purple for active tabs
 
   incomingRequests = AppBackend::_s_incoming_connection_requests;
-  std::ranges::sort(incomingRequests, std::less<>{},
-                    [](const ConnectionRequest &r) { return r.get_timepoint(); });
+  std::ranges::sort(incomingRequests, std::less<>{}, [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
   outgoingRequests = AppBackend::_s_outgoing_connection_requests;
-  std::ranges::sort(outgoingRequests, std::less<>{},
-                    [](const ConnectionRequest &r) { return r.get_timepoint(); });
+  std::ranges::sort(outgoingRequests, std::less<>{}, [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
   if (ImGui::Begin("Connection Requests", &showConnectionRequestWindow))
   {
@@ -401,7 +399,8 @@ void App::ShowChatWindow()
 
       for (int i = 0; i < static_cast<int>(AppBackend::_s_connections.size()); ++i)
       {
-        if (ImGui::Selectable(connections[i].get_user().get_id(), i == selectedConnectionIndex))
+        auto label = connections[i].get_user().get_name() + "##" + connections[i].get_user().get_id();
+        if (ImGui::Selectable(label, i == selectedConnectionIndex))
         {
           selectedConnectionIndex = i;
         }
@@ -434,17 +433,37 @@ void App::ShowChatWindow()
           if (ImGui::BeginTabItem("Chats"))
           {
 
-            for (const ChatMessage &m : itr->get_chat().get_messages())
+            for (int cnt = 0; const ChatMessage &m : itr->get_chat().get_messages())
             {
-              if(m.is_me())
+              static float wrap_width = 200.0f;
+              wrap_width = ImGui::GetContentRegionAvail().x * 0.6f;
+              // if (m.is_me())
+              if (cnt++ & 1)
               {
-                
+                // Calculate text width with wrapping
+                ImVec2 textSize = ImGui::CalcTextSize(m.get_text(), NULL, false, wrap_width);
+
+                // Calculate the starting X position for the text to right-align it
+                // Ensure we don't go negative in case the text is wider than the available space
+                float startPosX = std::max(ImGui::GetContentRegionAvail().x - textSize.x, 0.0f);
+
+                // Set cursor position to align text to the right
+                ImGui::SetCursorPosX(startPosX);
+
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)); // Red
+                ImGui::TextUnformatted(m.get_text());
+                ImGui::PopStyleColor();
+                ImGui::PopTextWrapPos();
               }
               else
               {
-                ImGui::Text(m.get_text());
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 1.0f, 1.0f)); // Pink
+                ImGui::TextUnformatted(m.get_text());
+                ImGui::PopStyleColor();
+                ImGui::PopTextWrapPos();
               }
-              // ImGui::Text()
             }
             ImGui::EndTabItem();
           }
