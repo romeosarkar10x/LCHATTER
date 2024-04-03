@@ -436,7 +436,15 @@ void App::ShowChatWindow()
 
             for (const ChatMessage &m : itr->get_chat().get_messages())
             {
-              ImGui::Text(m.get_text());
+              if(m.is_me())
+              {
+                
+              }
+              else
+              {
+                ImGui::Text(m.get_text());
+              }
+              // ImGui::Text()
             }
             ImGui::EndTabItem();
           }

@@ -1,21 +1,39 @@
-IMGUI_DIR=Frontend/Frontend_ImGui/externals/imgui
-SRC_DIR=Frontend/Frontend_ImGui/src
-OBJ_DIR=Objects
+#
+# Cross Platform Makefile
+# Compatible with MSYS2/MINGW, Ubuntu 14.04.1 and Mac OS X
+#
+# You will need GLFW (http://www.glfw.org):
+# Linux:
+#   apt-get install libglfw-dev
+# Mac OS X:
+#   brew install glfw
+# MSYS2:
+#   pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-glfw
+#
 
-EXE=LCHATTER.EXE
-SOURCES=
-SOURCES+=$(SRC_DIR)/Main.cpp
-SOURCES+=$(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
-SOURCES+=$(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+#CXX = g++
+#CXX = clang++
+
+IMGUI_DIR = Frontend/Frontend_Imgui/externals/imgui
+# IMPLOT_DIR = lib/implot
+SRC_DIR = Frontend/Frontend_ImGui/src
+OBJ_DIR = Obj
+
+EXE = LChatter.exe
+# SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/app_base.cpp $(SRC_DIR)/chat.cpp
+SOURCES = $(SRC_DIR)/Main.cpp
+SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
+SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+# SOURCES += $(IMPLOT_DIR)/implot.cpp $(IMPLOT_DIR)/implot_items.cpp
 
 include $(sources:.c=.d) 
 OBJS = $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS=
-CXXFLAGS+=-std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(IMPLOT_DIR)
-CXXFLAGS+=-g -Wall -Wformat -Wextra -Wpedantic -Wconversion -Wunused-variable -Wunused-parameter -Wunused-result
+CXXFLAGS = -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(IMPLOT_DIR)
+# CXXFLAGS += -g -Wall -Wformat
+CXXFLAGS += -O3 -Wall -Wformat
 LIBS =
 
 ##---------------------------------------------------------------------
@@ -100,14 +118,28 @@ $(OBJ_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp $(OBJ_DIR)/%.d
 $(OBJ_DIR)/%.o:$(IMPLOT_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-all: $(EXE)
-	@echo Build complete for $(ECHO_MESSAGE)
 
-$(EXE): $(OBJS)
+all: Backend $(EXE)
+	@echo "Build complete for $(ECHO_MESSAGE)"
+
+# $(EXE): $(OBJS)
+# 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+$(EXE): $(OBJS) Backend/Lib/AppBackend.a
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
+# include ../../Backend/Makefile
+.PHONY: Backend all
+
+Backend:
+	$(MAKE) -C "Backend"
+
+# ../../Backend/Lib/AppBackend.a:
+# 	$(MAKE) -C "../../Backend"
+	
+
 clean:
-	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d *.ini *.log
+	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d *.log *.ini
 
 .DEFAULT_GOAL := all
 .PHONY: clean

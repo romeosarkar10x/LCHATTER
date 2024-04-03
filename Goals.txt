@@ -1,7 +1,8 @@
 ## Implement a simple chat application that allows chat between two users.
 ## Message Delivery Acknowledgement.
-## Group Chat feature.
 ## File Storage.
+## Group Chat feature.
+
 ## Cryptography.
 ## End to End Encryption.
 ## File Transfer + Image Transfer.

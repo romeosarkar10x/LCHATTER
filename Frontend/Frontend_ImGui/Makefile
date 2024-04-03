@@ -118,11 +118,25 @@ $(OBJ_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp $(OBJ_DIR)/%.d
 $(OBJ_DIR)/%.o:$(IMPLOT_DIR)/%.cpp $(OBJ_DIR)/%.d
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-all: $(EXE)
-	@echo Build complete for $(ECHO_MESSAGE)
 
-$(EXE): $(OBJS)
+all: Backend $(EXE)
+	@echo "Build complete for $(ECHO_MESSAGE)"
+
+# $(EXE): $(OBJS)
+# 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+$(EXE): $(OBJS) ../../Backend/Lib/AppBackend.a
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+# include ../../Backend/Makefile
+.PHONY: Backend
+
+Backend:
+	$(MAKE) -C "../../Backend"
+
+# ../../Backend/Lib/AppBackend.a:
+# 	$(MAKE) -C "../../Backend"
+	
 
 clean:
 	rm -f $(EXE) $(OBJS) $(OBJ_DIR)/*.d *.log *.ini
