@@ -37,8 +37,9 @@ public:
   class Buffer
   {
     template<class _T>
-      class Buffer_Mixin /// CRTP
+      class Buffer_Mixin
       {
+        
       public:
         Buffer_Mixin() = delete;
         ~Buffer_Mixin() = delete;
@@ -46,9 +47,10 @@ public:
         static int    get_buffer_size() { return _T::_S_buffer_size; }
         static char*  get_buffer() { assert(_T::_s_buffer != nullptr); return _T::_s_buffer; }
 
-        static void init() { if(_T::_s_buffer == nullptr) { _T::_s_buffer = new char [_T::_S_buffer_size]; } }
+        static void alloc() { if(_T::_s_buffer == nullptr) { _T::_s_buffer = new char [_T::_S_buffer_size]; } }
+        static void dealloc() { if(_T::_s_buffer != nullptr) { delete [] _T::_s_buffer; _T::_s_buffer = nullptr; } }
+        
         static void clear() { if(_T::_s_buffer != nullptr) { _T::_s_buffer[0] = 0; } }
-        static void destroy() { if(_T::_s_buffer != nullptr) { delete [] _T::_s_buffer; _T::_s_buffer = nullptr; } }
 
       };
 
@@ -88,46 +90,13 @@ public:
       static char*      _s_buffer;
     };
     
-    static void init();
+    static void alloc();
+    static void dealloc();
+
     static void clear();
-    static void destroy();
   };
 
-  class Frontend_Event
-  {
-
-  public:
-    enum Enum_Frontend_Event : char
-    {
-      NONE,
-
-      LOGIN,
-      LOGIN_ANONYMOUS,
-      LOGOUT,
-      
-      SEND_CHAT_MESSAGE,
-
-        SEND_CONNECTION_REQUEST,
-      ACCEPT_CONNECTION_REQUEST,
-      REJECT_CONNECTION_REQUEST,
-
-      /// GROUP
-      SEND_GROUP_CHAT_MESSAGE,
-        
-        SEND_GROUP_CONNECTION_REQUEST,
-      ACCEPT_GROUP_CONNECTION_REQUEST,
-      REJECT_GROUP_CONNECTION_REQUEST,
-    };
-
-    static void                 set_event(Enum_Frontend_Event event);
-    static Enum_Frontend_Event  get_event();
-
-    static void handle_event();
-
-  private:
-    static Enum_Frontend_Event _s_event;
-    friend std::ostream& operator<<(std::ostream& o, const AppBackend::Frontend_Event::Enum_Frontend_Event e);
-  };
+  class Frontend_Event;
 
   static String _s_current_id;
   static constexpr auto _Projection = [] (const ConnectionRequest& c) -> const String& { return c.get_user().get_id(); };
@@ -148,6 +117,8 @@ private:
 public:
 
   static void init();
+  static void destroy();
+  
   static void update();
 
   static void set_id(const String& id);
