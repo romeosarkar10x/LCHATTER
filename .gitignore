@@ -12,8 +12,11 @@
 
 *.log
 
+*.a
 *.o
 *.d
 *.ini
 
 *.rough
+
+build
