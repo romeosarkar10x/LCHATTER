@@ -1,4 +1,5 @@
 #include "../../Inc/Chat/ChatMessage.hpp"
+#include "../../Inc/File/Serializer.hpp"
 
 ChatMessage::ChatMessage(const User& sender, const String& message, bool is_me) :
 _m_sender { sender },
@@ -13,18 +14,19 @@ bool              ChatMessage::is_me() const { return _m_is_me; }
 
 bool ChatMessage::operator<(ChatMessage& rhs) { return _m_timepoint < rhs._m_timepoint; }
 
-int ChatMessage::serialize(char* buffer) const
+int ChatMessage::serialization_length() const
 {
-  int offset = 0;
-
-  offset += _m_sender.serialize(buffer, offset);
-  offset += _m_text.serialize(buffer, offset);
-  offset += _m_timepoint.serialize(buffer, offset);
-
-  return offset;
+  return Serializer::serialization_length(_m_sender) +
+    Serializer::serialization_length(_m_text) +
+    Serializer::serialization_length(_m_timepoint);
 }
 
-int ChatMessage::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void ChatMessage::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_sender, buffer, offset);
+  Serializer::serialize(_m_text, buffer, offset);
+  Serializer::serialize(_m_timepoint, buffer, offset);
+}
 
 int ChatMessage::deserialize(const char* buffer)
 {

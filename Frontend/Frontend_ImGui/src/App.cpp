@@ -357,7 +357,7 @@ void App::ShowChatWindow()
 
     // Left
     {
-      ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y), ImGuiChildFlags_ResizeX);
+      ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y));
 
       // Display Port Number
       // char port[6];

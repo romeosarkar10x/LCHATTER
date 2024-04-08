@@ -36,8 +36,7 @@ public:
   String to_string() const;
 
   int serialization_length() const;
-  int serialize(char* buffer) const;
-  int serialize(char* buffer, int offset) const;
+  void serialize(char* buffer, int& offset) const;
   
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

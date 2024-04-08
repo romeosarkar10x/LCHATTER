@@ -30,4 +30,4 @@ std::ofstream* Logger::operator->() { return &_m_file; }
 
 Logger::~Logger() { _m_file.close(); }
 
-Logger logger { "AppBackend.log" };
+Logger logger { "LC_AppBackend.log" };

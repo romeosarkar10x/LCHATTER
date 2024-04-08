@@ -1,20 +1,38 @@
-class Serializer
+#include <iostream>
+#include <type_traits>
+
+#include "../../Inc/File/Serializer.hpp"
+
+void Serializer::serialize(const FILETIME object, char* const buffer, int& offset)
 {
+  Serializer::serialize(object.dwLowDateTime, buffer, offset);
+  Serializer::serialize(object.dwHighDateTime, buffer, offset);
+}
 
-  public:
+int Serializer::serialization_length(const FILETIME object)
+{
+  return Serializer::serialization_length(object.dwLowDateTime) + 
+    Serializer::serialization_length(object.dwHighDateTime);
+}
+
+// int main()
+// {
+//   int arr[] = { 2, 3, 4, 5 };
   
-  template<typename _Tp>
-  struct is_serializable
-  {
-    // bool value 
-  };
+//   char* buffer = reinterpret_cast<char*>(arr);
+//   int offset = 0;
 
-  template<typename _Tp>
-    static int serialize(char* buffer, _Tp&& object)
-    {
-      // static_assert()
-    }
+//   Serializer::serialize(4, buffer, offset);
+//   Serializer::serialize(5, buffer, offset);
+//   Serializer::serialize(6, buffer, offset);
+//   Serializer::serialize(7, buffer, offset);
 
-  Serializer() = delete;
-  ~Serializer() = delete;
-};
+//   for(int i = 0; i < 4; i++)
+//   {
+//     std::cout << arr[i] << " ";
+//   }
+
+//   std::cout << std::endl;
+
+//   return 0;
+// }

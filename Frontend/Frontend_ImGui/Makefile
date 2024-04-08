@@ -19,7 +19,7 @@ IMGUI_DIR = externals/imgui
 SRC_DIR = src
 OBJ_DIR = obj
 
-EXE = LChatter.exe
+EXE = LCHATTER.EXE
 # SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/app_base.cpp $(SRC_DIR)/chat.cpp
 SOURCES = $(SRC_DIR)/Main.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp

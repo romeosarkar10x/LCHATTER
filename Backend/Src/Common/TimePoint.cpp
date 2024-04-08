@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "../../Inc/Common/TimePoint.hpp"
+#include "../../Inc/File/Serializer.hpp"
 
 /// OS Dependent
 
@@ -95,13 +96,15 @@ void TimePoint::refresh()
   _m_localtime_is_valid = false;
 }
 
-int TimePoint::serialize(char* buffer) const
+int TimePoint::serialization_length() const
 {
-  std::memcpy(buffer, &_m_filetime, sizeof(FILETIME));
-  return sizeof(FILETIME);
+  return Serializer::serialization_length(_m_filetime);
 }
 
-int TimePoint::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void TimePoint::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_filetime, buffer, offset);
+}
 
 int TimePoint::deserialize(const char* buffer)
 {

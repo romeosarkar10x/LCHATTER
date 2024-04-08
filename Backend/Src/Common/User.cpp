@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "../../Inc/Common/User.hpp"
+#include "../../Inc/File/Serializer.hpp"
 
 User::User(const char* username, const char* psw) :
   _m_name { username },
@@ -20,17 +21,18 @@ const String& User::get_id() const { return _m_id.to_string(); }
 
 bool User::operator==(const User& rhs) const { return (_m_id == rhs._m_id); }
 
-int User::serialize(char* buffer) const
+int User::serialization_length() const
 {
-  int offset = 0;
-
-  offset += _m_name.serialize(buffer);
-  offset += _m_id.serialize(reinterpret_cast<char*>(buffer) + offset);
-
-  return offset;
+  return Serializer::serialization_length(_m_name) +
+    Serializer::serialization_length(_m_id);
 }
 
-int User::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void User::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_name, buffer, offset);
+  Serializer::serialize(_m_id, buffer, offset);
+}
+
 
 int User::deserialize(const char* buffer)
 {

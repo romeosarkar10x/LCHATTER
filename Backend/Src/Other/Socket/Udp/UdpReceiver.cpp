@@ -9,13 +9,13 @@ UdpMessage* UdpReceiver::receive()
   
   int offset = 0;
 
-  if(!AppSignature::is_valid(get_buffer()))
+  if(!AppSignature::get_signature().is_match(get_buffer()))
   {
-    logger << "ERROR: Invalid AppSignature\n";
+    logger << "ERROR: INVALID AppSignature\n";
     return new UdpMessage { UdpMessage::Type::INVALID };
   }
   
-  offset += AppSignature::deserialize(get_buffer(), offset);
+  offset += AppSignature::get_signature().serialization_length();
 
   UdpMessage::Type t;
   offset += t.deserialize(get_buffer(), offset);

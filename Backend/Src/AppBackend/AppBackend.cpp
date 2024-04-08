@@ -33,12 +33,12 @@ void AppBackend::Buffer::dealloc()
 
 void AppBackend::handle_receive()
 {
+  logger << Logger::timestamp << "RECEIVE_BEGIN " << Logger::endl;
+  
   UdpMessage* m = _s_receiver.receive();
   Address sender_addr = _s_receiver.get_sender_address();
 
   if(m->get_type() == UdpMessage::Type::NONE) { return; }
-
-  logger << Logger::timestamp << "RECEIVE_BEGIN " << m->get_type() << Logger::endl;
   
   switch(m->get_type())
   {

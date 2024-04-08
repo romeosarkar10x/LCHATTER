@@ -17,8 +17,8 @@ public:
   UdpMessage_ConnectionRequest(UdpMessage::Type t);
   UdpMessage_ConnectionRequest(UdpMessage::Type t, const ConnectionRequest& r);
   
-  int serialize(char* buffer) const;
-  int serialize(char* buffer, int offset) const;
+  int serialization_length() const;
+  void serialize(char* buffer, int& offset) const;
 
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

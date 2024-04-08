@@ -1,4 +1,5 @@
 #include "../../../../../Inc/Other/Socket/Udp/UdpMessage/UdpMessage_ConnectionRequest.hpp"
+#include "../../../../../Inc/File/Serializer.hpp"
 
 UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest() :
 UdpMessage { UdpMessage::Type::CONNECTION_REQUEST } {}
@@ -25,17 +26,17 @@ ConnectionRequest { r } {}
 // _m_user { user },
 // _m_addr { addr } {}
 
-int UdpMessage_ConnectionRequest::serialize(char* buffer) const
+int UdpMessage_ConnectionRequest::serialization_length() const
 {
-  int offset = 0;
-  
-  offset += UdpMessage::serialize(buffer, offset);
-  offset += ConnectionRequest::serialize(buffer, offset);
-
-  return offset;
+  return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) + 
+    Serializer::serialization_length(static_cast<const ConnectionRequest&>(*this));
 }
 
-int UdpMessage_ConnectionRequest::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void UdpMessage_ConnectionRequest::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
+  Serializer::serialize(static_cast<const ConnectionRequest&>(*this), buffer, offset);
+}
 
 int UdpMessage_ConnectionRequest::deserialize(const char* buffer)
 {

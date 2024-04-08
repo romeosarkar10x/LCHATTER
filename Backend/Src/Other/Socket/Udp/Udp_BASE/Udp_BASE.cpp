@@ -40,6 +40,8 @@ void Udp_BASE::_m_destroy()
 {
   if(_m_is_initialized)
   {
+    delete [] _m_buffer;
+
     int ret = closesocket(_m_socket);
     assert(ret != SOCKET_ERROR);
 
@@ -53,9 +55,9 @@ const Address&  Udp_BASE::get_socket_address() const { assert(_m_is_initialized)
 char*         Udp_BASE::get_buffer() { assert(_m_is_initialized); return _m_buffer; }
 int    Udp_BASE::get_buffer_size() { return _S_buffer_size; }
 
-int           Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
-void          Udp_BASE::reset_offset() { assert(_m_is_initialized); _m_offset = 0; }
-void          Udp_BASE::increment_offset(int amount) { assert(_m_is_initialized); _m_offset += amount; }
+int Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
+void Udp_BASE::reset_offset() { assert(_m_is_initialized); _m_offset = 0; }
+void Udp_BASE::increment_offset(int amount) { assert(_m_is_initialized); _m_offset += amount; }
 
 
 Udp_BASE::~Udp_BASE()

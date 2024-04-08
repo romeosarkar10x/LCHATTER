@@ -1,21 +1,21 @@
 #include "../../../../../Inc/Other/Socket/Udp/UdpMessage/UdpMessage_ChatMessage.hpp"
+#include "../../../../../Inc/File/Serializer.hpp"
 
 UdpMessage_ChatMessage::UdpMessage_ChatMessage(const ChatMessage& m) :
   UdpMessage { UdpMessage::Type::CHAT_MESSAGE },
   ChatMessage { m } {}
 
-int UdpMessage_ChatMessage::serialize(char* buffer) const
+int UdpMessage_ChatMessage::serialization_length() const
 {
-  int offset = 0;
-
-  offset += UdpMessage::serialize(buffer, offset);
-  offset += ChatMessage::serialize(buffer, offset);
-
-  return offset;
+  return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) +
+    Serializer::serialization_length(static_cast<const ChatMessage&>(*this));
 }
 
-int UdpMessage_ChatMessage::serialize(char* buffer, int offset) const
-  { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void UdpMessage_ChatMessage::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
+  Serializer::serialize(static_cast<const ChatMessage&>(*this), buffer, offset);
+}
 
 int UdpMessage_ChatMessage::deserialize(const char* buffer)
 {

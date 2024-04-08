@@ -3,12 +3,12 @@
 
 #include "UdpMessage_ConnectionRequest.hpp"
 
-// class UdpMessage_ConnectionRequestRejected : public UdpMessage
-// {
+class UdpMessage_ConnectionRequest_Rejected : public UdpMessage
+{
   
-// public:
-//   UdpMessage_ConnectReject() :
-//   UdpMessage { UdpMessage::Type::CONNECTION_REQUEST_REJECTED } {}
-// };
+public:
+  UdpMessage_ConnectionRequest_Rejected() :
+  UdpMessage { UdpMessage::Type::CONNECTION_REQUEST_REJECTED } {}
+};
 
 #endif

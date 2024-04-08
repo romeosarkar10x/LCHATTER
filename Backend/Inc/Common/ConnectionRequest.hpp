@@ -1,8 +1,8 @@
 #ifndef CONNECTION_REQUEST_HPP
 #define CONNECTION_REQUEST_HPP
 
-#include "User.hpp"
 #include "../Other/Socket/Address.hpp" /// <winsock2.h>
+#include "User.hpp" /// <windows.h>
 #include "TimePoint.hpp" /// <windows.h>
 
 class ConnectionRequest
@@ -48,8 +48,8 @@ public:
 
   bool operator<(const ConnectionRequest& rhs);
 
-  int serialize(char* buffer)               const;
-  int serialize(char* buffer, int offset)   const;
+  int serialization_length() const;
+  void serialize(char* buffer, int& offset) const;
 
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

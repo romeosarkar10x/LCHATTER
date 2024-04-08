@@ -1,26 +1,30 @@
+#include <iostream>
 #include <cstring>
 
 #include "../../../../Inc/Other/Socket/Udp/AppSignature.hpp"
+#include "../../../../Inc/File/Serializer.hpp"
 
-
-
-int AppSignature::serialize(char* buffer)
+int AppSignature::serialization_length() const
 {
-  std::memcpy(buffer, _S_Signature, _S_Signature_Length);
-  return _S_Signature_Length;
+  return _M_sig.get_length();
 }
 
-int AppSignature::serialize(char* buffer, int offset) { return serialize(reinterpret_cast<char*>(buffer) + offset); }
-
-int AppSignature::deserialize(void*) { return _S_Signature_Length; }
-
-int AppSignature::deserialize(void*, int) { return _S_Signature_Length; }
-
-bool AppSignature::is_valid(const char* buffer)
+void AppSignature::serialize(char* const buffer, int& offset) const
 {
-  return (0 == std::memcmp(_S_Signature, buffer, _S_Signature_Length));
+  Serializer::serialize(_M_sig.get_buffer(), _M_sig.get_length(), buffer, offset);
 }
 
+const AppSignature& AppSignature::get_signature()
+{
+  return _S_sig;
+}
 
-const char AppSignature::_S_Signature[] = "LC";
-const int AppSignature::_S_Signature_Length = static_cast<int>(std::strlen(_S_Signature));
+bool AppSignature::is_match(const char* const buffer) const
+{
+  return (0 == std::memcmp(_M_sig.get_buffer(), buffer, _M_sig.get_length()));
+  // std::cout << "_M_sig: " << _M_sig.get_buffer() << std::endl;
+  // std::cout << "buffer: " << buffer << std::endl;
+  // return ans;
+}
+
+const AppSignature AppSignature::_S_sig { "LC" };

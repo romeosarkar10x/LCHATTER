@@ -1,22 +1,27 @@
 #ifndef APP_SIGNATURE_HPP
 #define APP_SIGNATURE_HPP
 
-#include <cstring>
+#include <iostream>
+#include "../../../../Inc/Common/String.hpp"
 
 class AppSignature
 {
-  static const char _S_Signature[];
-  static const int _S_Signature_Length;
+  static const AppSignature _S_sig;
+
+  const String _M_sig;
 
 public:
 
-  static int serialize(char* buffer);
-  static int serialize(char* buffer, int offset);
-  
-  static int deserialize(void*);
-  static int deserialize(void*, int);
-  
-  static bool is_valid(const char* buffer);
+  AppSignature(const char* sig) :
+    _M_sig { sig } {}
+
+  int serialization_length() const;
+  void serialize(char* const buffer, int& offset) const;
+
+  static const AppSignature& get_signature();
+  bool is_match(const char* buffer) const;
 };
+
+
 
 #endif

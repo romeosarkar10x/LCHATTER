@@ -6,8 +6,8 @@
 
 #include <cstdlib>
 
-#include "../Common/User.hpp"
 #include "../Other/Socket/Address.hpp" /// <winsock2.h>
+#include "../Common/User.hpp" /// <windows.h>
 #include "../Common/Connection.hpp"
 #include "../File/Logger.hpp" /// <windows.h>
 
@@ -98,24 +98,6 @@ public:
 
   class Frontend_Event;
 
-  static String _s_current_id;
-  static constexpr auto _Projection = [] (const ConnectionRequest& c) -> const String& { return c.get_user().get_id(); };
-
-  static User         _s_me;
-  static UdpSender    _s_sender;
-  static UdpReceiver  _s_receiver;
-
-  static std::vector<ConnectionRequest> _s_incoming_connection_requests;
-  static std::vector<ConnectionRequest> _s_outgoing_connection_requests;
-
-  static std::vector<Connection> _s_connections;
-  
-private:
-  
-  static void handle_receive();
-
-public:
-
   static void init();
   static void destroy();
   
@@ -123,8 +105,31 @@ public:
 
   static void set_id(const String& id);
 
-  AppBackend() = delete;
+  static const User&        get_me() { return _s_me; }
+  static const UdpSender&   get_sender() { return _s_sender; }
+  static const UdpReceiver& get_receiver() { return _s_receiver; }
+
+  AppBackend()  = delete;
   ~AppBackend() = delete;
+
+private:
+
+public:
+  static String _s_current_id;
+  static constexpr auto _Projection = [] (const ConnectionRequest& c) -> const String& { return c.get_user().get_id(); };
+
+  static User         _s_me;
+  static UdpSender    _s_sender;
+  static UdpReceiver  _s_receiver;
+
+  static std::vector<Connection>          _s_connections;
+  static std::vector<ConnectionRequest>   _s_incoming_connection_requests;
+  static std::vector<ConnectionRequest>   _s_outgoing_connection_requests;
+
+
+  static void handle_receive();
+  static void load();
+  static void save();
 };
 
 #endif

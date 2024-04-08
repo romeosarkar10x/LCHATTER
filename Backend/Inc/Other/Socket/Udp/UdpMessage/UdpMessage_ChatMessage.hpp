@@ -14,8 +14,8 @@ public:
   UdpMessage_ChatMessage(const ChatMessage& m);
   ~UdpMessage_ChatMessage() = default;
 
-  int serialize(char* buffer) const;
-  int serialize(char* buffer, int offset) const;
+  int serialization_length() const;
+  void serialize(char* buffer, int& offset) const;
 
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

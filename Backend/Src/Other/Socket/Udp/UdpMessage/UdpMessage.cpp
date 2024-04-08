@@ -1,14 +1,20 @@
 #include "../../../../../Inc/Other/Socket/Udp/UdpMessage/UdpMessage.hpp"
+#include "../../../../../Inc/File/Serializer.hpp"
 
 UdpMessage::Type::Type(Enum_Type type) : _m_t { type } {};
 
-int UdpMessage::Type::serialize(char* buffer) const
+int UdpMessage::Type::serialization_length() const
 {
-  *reinterpret_cast<Enum_Type*>(buffer) = _m_t;
-  return sizeof(Enum_Type);
+  return Serializer::serialization_length(_m_t);
 }
 
-int UdpMessage::Type::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void UdpMessage::Type::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_t, buffer, offset);
+  // *reinterpret_cast<Enum_Type*>(buffer) = _m_t;
+  // return sizeof(Enum_Type);
+}
+
 
 int UdpMessage::Type::deserialize(const char* buffer)
 {
@@ -25,12 +31,16 @@ UdpMessage::UdpMessage(Type m_type) : _m_type { m_type } {}
 UdpMessage::Type UdpMessage::get_type() const { return _m_type; }
 
 
-int UdpMessage::serialize(char* buffer) const
+int UdpMessage::serialization_length() const
 {
-  return _m_type.serialize(buffer);
+  return Serializer::serialization_length(_m_type);
 }
 
-int UdpMessage::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void UdpMessage::serialize(char* const buffer, int& offset) const
+{
+  Serializer::serialize(_m_type, buffer, offset);
+}
+
 
 int UdpMessage::deserialize(const char* buffer)
 {

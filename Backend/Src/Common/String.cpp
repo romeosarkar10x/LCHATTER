@@ -3,7 +3,18 @@
 #include <cinttypes>
 
 #include "../../Inc/Common/String.hpp"
+#include "../../Inc/File/Serializer.hpp"
 
+void String::_m_destroy()
+{
+  if(_m_length >= _S_threshold_length)
+  {
+    delete [] _m_p;
+
+    _m_length = 0;
+    reinterpret_cast<char*>(&_m_p)[0] = 0;
+  }
+}
 
 char* String::_m_get_buffer()
 {
@@ -50,13 +61,7 @@ String::String(String&& rhs) noexcept :
 
 String::~String()
 {
-  if(_m_length >= _S_threshold_length)
-  {
-    delete [] _m_p;
-
-    _m_length = 0;
-    reinterpret_cast<char*>(&_m_p)[0] = 0;
-  }
+  _m_destroy();
 }
 
 String& String::operator=(const String& rhs)
@@ -134,17 +139,20 @@ int         String::get_length() const noexcept { return _m_length; }
 
 String::operator const char*() const noexcept { return _m_get_buffer(); }
 
-int String::serialization_length() const { return static_cast<int>(sizeof(int)) + _m_length + 1; }
-
-int String::serialize(char* const buffer) const
+int String::serialization_length() const
 {
-  *reinterpret_cast<int*>(buffer) = _m_length;
-  std::memcpy(buffer + sizeof(int), _m_get_buffer(), _m_length + 1);
-
-  return serialization_length();
+  return Serializer::serialization_length(_m_length) +
+    Serializer::serialization_length(_m_get_buffer(), _m_length + 1);
 }
 
-int String::serialize(char* buffer, int offset) const { return serialize(buffer + offset); }
+void String::serialize(char* const buffer, int& offset) const
+{
+  Serializer::serialize(_m_length, buffer, offset);
+  Serializer::serialize(_m_get_buffer(), _m_length + 1, buffer, offset);
+  // std::memcpy(buffer + offset, _m_get_buffer(), _m_length + 1);
+}
+
+// int String::serialize(char* buffer, int offset) const { return serialize(buffer + offset); }
 
 int String::deserialize(const char* const buffer)
 {

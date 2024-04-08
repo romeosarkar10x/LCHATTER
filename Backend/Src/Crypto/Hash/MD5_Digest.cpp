@@ -5,6 +5,7 @@
 #include "../../../Inc/Crypto/Hash/MD5_Digest.hpp"
 #include "../../../Inc/Common/String.hpp"
 #include "../../../Inc/Common/Fwd.hpp"
+#include "../../../Inc/File/Serializer.hpp"
 
 
 MD5_Digest::MD5_Digest(const char* buffer) { std::memcpy(_m_buffer, buffer, sizeof(_m_buffer)); }
@@ -47,9 +48,9 @@ const String& MD5_Digest::to_string() const
 
   for(int offset = 0; offset < 16; offset++)
   {
-    u_int byte = static_cast<u_int>(*(_m_buffer + offset));
-    s[i++] = hexadecimal_digit(static_cast<char>(byte / 16u));
-    s[i++] = hexadecimal_digit(static_cast<char>(byte % 16u));
+    u_int curr_byte = static_cast<u_int>(*(_m_buffer + offset));
+    s[i++] = hexadecimal_digit(static_cast<char>(curr_byte / 16u));
+    s[i++] = hexadecimal_digit(static_cast<char>(curr_byte % 16u));
   }
 
   s[i] = 0;
@@ -62,13 +63,15 @@ const String& MD5_Digest::to_string() const
 
 bool MD5_Digest::operator==(const MD5_Digest& rhs) const { return (std::memcmp(_m_buffer, rhs._m_buffer, 16) == 0); }
 
-int MD5_Digest::serialize(char* buffer) const
+int MD5_Digest::serialization_length() const
 {
-  std::memcpy(buffer, _m_buffer, 16);
-  return 16;
+  return Serializer::serialization_length(_m_buffer);
 }
 
-int MD5_Digest::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void MD5_Digest::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_buffer, buffer, offset);
+}
 
 int MD5_Digest::deserialize(const char* buffer)
 {

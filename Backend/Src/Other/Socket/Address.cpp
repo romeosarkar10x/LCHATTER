@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include "../../../Inc/Other/Socket/Address.hpp"
+#include "../../../Inc/File/Serializer.hpp"
 
 Address::Address() { _m_addr.sin_family = AF_INET; }
 
@@ -37,17 +38,17 @@ void Address::set_ip_address(const Address& addr) { _m_addr.sin_addr = addr._m_a
 
 String Address::to_string() const { return "{" + get_ip_address() + ":" + get_port() + "}"; }
 
-int Address::serialization_length() const { return sizeof(_m_addr.sin_port) + sizeof(_m_addr.sin_addr); }
-
-int Address::serialize(char* buffer) const
+int Address::serialization_length() const
 {
-  std::memcpy(buffer, &_m_addr.sin_port, sizeof(_m_addr.sin_port));
-  std::memcpy(buffer + sizeof(_m_addr.sin_port), &(_m_addr.sin_addr), sizeof(_m_addr.sin_addr));
-
-  return serialization_length();
+  return Serializer::serialization_length(_m_addr.sin_port)+ 
+    Serializer::serialization_length(_m_addr.sin_addr.s_addr); 
 }
 
-int Address::serialize(char* buffer, int offset) const { return serialize(reinterpret_cast<char*>(buffer) + offset); }
+void Address::serialize(char* buffer, int& offset) const
+{
+  Serializer::serialize(_m_addr.sin_port, buffer, offset);
+  Serializer::serialize(_m_addr.sin_addr.s_addr, buffer, offset); 
+}
 
 int Address::deserialize(const char* buffer)
 {

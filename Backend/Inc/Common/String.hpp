@@ -12,10 +12,10 @@ class String
 
   static const int _S_threshold_length = sizeof(_m_p); /// small string optimization
 
-  char*         _m_get_buffer();
-  const char*   _m_get_buffer()       const;
+  inline void _m_destroy();
 
-  // static const _m_next_power_of_two()
+  char*         _m_get_buffer();
+  const char*   _m_get_buffer() const;
 
 public:
   String();
@@ -33,30 +33,27 @@ public:
 
   void swap(String& rhs) noexcept;
 
-  String operator+(const String& rhs)       const;
-  String operator+(const char* const rhs)   const;
+  String operator+(const String& rhs) const;
+  String operator+(const char* const rhs) const;
 
-  bool operator<(const String& rhs)         const;
+  bool operator<(const String& rhs) const;
   
-  bool operator==(const String& rhs)        const;
-  bool operator!=(const String& rhs)        const;
+  bool operator==(const String& rhs) const;
+  bool operator!=(const String& rhs) const;
   
-  const char* get_buffer()                  const noexcept;
-  int         get_length()                  const noexcept;
+  const char* get_buffer() const noexcept;
+  int         get_length() const noexcept;
 
-  operator const char*()                    const noexcept;
+  operator const char*() const noexcept;
   
-  int serialization_length()                const;
-  
-  int serialize(char* const buffer)         const;
-  int serialize(char* buffer, int offset)   const;
+  int serialization_length() const;
+  void serialize(char* buffer, int& offset) const;
 
   int deserialize(const char* const buffer);
   int deserialize(const char* buffer, int offset);
 
-  template<typename _Tp>
-    static String to_string(_Tp&& param) { return std::to_string(std::forward<_Tp>(param)); }
+  template<typename T>
+    static String to_string(T&& param) { return std::to_string(std::forward<T>(param)); }
 };
-
 
 #endif
