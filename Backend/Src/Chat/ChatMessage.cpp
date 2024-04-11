@@ -14,14 +14,14 @@ bool              ChatMessage::is_me() const { return _m_is_me; }
 
 bool ChatMessage::operator<(ChatMessage& rhs) { return _m_timepoint < rhs._m_timepoint; }
 
-int ChatMessage::serialization_length() const
+unsigned int ChatMessage::serialization_length() const
 {
   return Serializer::serialization_length(_m_sender) +
     Serializer::serialization_length(_m_text) +
     Serializer::serialization_length(_m_timepoint);
 }
 
-void ChatMessage::serialize(char* buffer, int& offset) const
+void ChatMessage::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_sender, buffer, offset);
   Serializer::serialize(_m_text, buffer, offset);

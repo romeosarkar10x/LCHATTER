@@ -26,7 +26,7 @@ template<class T>
 
 struct foo {};
 struct foo_with_incorrect_serialize { void serialize(const char*, int&) const; };
-struct foo_with_serialize { int serialize(const char* const, int&) const; };
+struct foo_with_serialize { unsigned int serialize(const char* const, int&) const; };
 
 int main()
 {

@@ -4,12 +4,12 @@
 #include "../../../../Inc/Other/Socket/Udp/AppSignature.hpp"
 #include "../../../../Inc/File/Serializer.hpp"
 
-int AppSignature::serialization_length() const
+unsigned int AppSignature::serialization_length() const
 {
   return _M_sig.get_length();
 }
 
-void AppSignature::serialize(char* const buffer, int& offset) const
+void AppSignature::serialize(char* const buffer, unsigned int& offset) const
 {
   Serializer::serialize(_M_sig.get_buffer(), _M_sig.get_length(), buffer, offset);
 }

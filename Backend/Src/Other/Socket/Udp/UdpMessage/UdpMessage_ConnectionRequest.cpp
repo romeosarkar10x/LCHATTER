@@ -26,13 +26,13 @@ ConnectionRequest { r } {}
 // _m_user { user },
 // _m_addr { addr } {}
 
-int UdpMessage_ConnectionRequest::serialization_length() const
+unsigned int UdpMessage_ConnectionRequest::serialization_length() const
 {
   return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) + 
     Serializer::serialization_length(static_cast<const ConnectionRequest&>(*this));
 }
 
-void UdpMessage_ConnectionRequest::serialize(char* buffer, int& offset) const
+void UdpMessage_ConnectionRequest::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
   Serializer::serialize(static_cast<const ConnectionRequest&>(*this), buffer, offset);

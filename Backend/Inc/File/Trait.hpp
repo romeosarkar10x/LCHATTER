@@ -14,9 +14,9 @@ template<class T>
   using underlying_pointer_type_t = underlying_pointer_type<T>::type;
 
 template<class T>
-  using is_linear_pointer = std::__and_<
+  using is_linear_pointer = std::conjunction<
     std::is_pointer<T>,
-    std::__not_<std::is_pointer<underlying_pointer_type_t<T>>>
+    std::negation<std::is_pointer<underlying_pointer_type_t<T>>>
   >;
 
 template<class T>
@@ -29,8 +29,9 @@ template<class T>
   private:
     template<
       class U,
-      class V = decltype(std::declval<const U>().serialize(std::declval<char*>(), std::declval<int&>())),
-      class = std::enable_if_t<std::is_same_v<void, V>>>
+      class V = decltype(std::declval<const U>().serialize(std::declval<char*>(), std::declval<unsigned int&>())),
+      class = std::enable_if_t<std::is_same_v<void, V>>
+    >
       static std::true_type test(U object);
 
     static std::false_type test(...);
@@ -53,7 +54,8 @@ template<class T>
     template<
       class U,
       class V = decltype(std::declval<const U>().serialization_length()),
-      class = std::enable_if_t<std::is_same_v<int, V>>>
+      class = std::enable_if_t<std::is_same_v<unsigned int, V>>
+    >
       static std::true_type test(U object);
 
     static std::false_type test(...);
@@ -74,32 +76,32 @@ template<class T>
 template<class T>
   struct underlying_array_type<T[]> { using type = T; };
 
-template<class T, int N>
+template<class T, unsigned int N>
   struct underlying_array_type<T[N]> { using type = T; };
 
 template<class T>
   using underlying_array_type_t = underlying_array_type<T>::type;
 
 template<class T>
-  struct underlying_array_size : std::integral_constant<int, 0> {};
+  struct underlying_array_size : std::integral_constant<unsigned int, 0U> {};
 
-template<class T, int N>
-  struct underlying_array_size<T[N]> : std::integral_constant<int, N> {};
-
-template<class T>
-  static constexpr int underlying_array_size_v = underlying_array_size<T>::value;
+template<class T, unsigned int N>
+  struct underlying_array_size<T[N]> : std::integral_constant<unsigned int, N> {};
 
 template<class T>
-  using is_linear_array = std::__and_<
+  static constexpr unsigned int underlying_array_size_v = underlying_array_size<T>::value;
+
+template<class T>
+  using is_linear_array = std::conjunction<
     std::is_array<T>,
-    std::__not_<std::is_array<underlying_array_type_t<T>>>
+    std::negation<std::is_array<underlying_array_type_t<T>>>
   >;
 
 template<class T>
   constexpr bool is_linear_array_v = is_linear_array<T>::value;
 
 template<class T>
-  using is_bounded_linear_array = std::__and_<
+  using is_bounded_linear_array = std::conjunction<
     is_linear_array<T>,
     std::is_bounded_array<T>
   >;

@@ -3,7 +3,8 @@
 
 void UdpSender::send(const Address& receiver, const UdpMessage* m)
 {
-  char* buffer = get_buffer(); int offset = 0;
+  unsigned int offset = 0;
+  char* buffer = get_buffer();
 
   // offset += AppSignature::serialize(get_buffer(), offset);
   Serializer::serialize(AppSignature::get_signature(), buffer, offset);

@@ -3,13 +3,13 @@
 
 #include "../../Inc/File/Serializer.hpp"
 
-void Serializer::serialize(const FILETIME object, char* const buffer, int& offset)
+void Serializer::serialize(const FILETIME object, char* const buffer, unsigned int& offset)
 {
   Serializer::serialize(object.dwLowDateTime, buffer, offset);
   Serializer::serialize(object.dwHighDateTime, buffer, offset);
 }
 
-int Serializer::serialization_length(const FILETIME object)
+unsigned int Serializer::serialization_length(const FILETIME object)
 {
   return Serializer::serialization_length(object.dwLowDateTime) + 
     Serializer::serialization_length(object.dwHighDateTime);

@@ -96,12 +96,12 @@ void TimePoint::refresh()
   _m_localtime_is_valid = false;
 }
 
-int TimePoint::serialization_length() const
+unsigned int TimePoint::serialization_length() const
 {
   return Serializer::serialization_length(_m_filetime);
 }
 
-void TimePoint::serialize(char* buffer, int& offset) const
+void TimePoint::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_filetime, buffer, offset);
 }

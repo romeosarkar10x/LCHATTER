@@ -1,5 +1,6 @@
 #include "../../Inc/AppBackend/AppBackend.hpp"
 #include "../../Inc/AppBackend/Frontend_Event.hpp"
+#include "../../Inc/File/Saver.hpp"
 
 AppBackend::State::Enum_State AppBackend::State::get_state() { return _s_state; }
 void       AppBackend::State::set_state(Enum_State state) { _s_state = state; }
@@ -134,7 +135,19 @@ void AppBackend::update()
 
   
 void   AppBackend::set_id(const String& id) { _s_current_id = id; }
-  
+
+void AppBackend::save()
+{
+  saver.write(State::_s_state);
+
+  saver.write(_s_me);
+  saver.write(_s_connections);
+  saver.write(_s_incoming_connection_requests);
+  saver.write(_s_outgoing_connection_requests);
+
+  saver.save();
+}
+
 
 char* AppBackend::Buffer::Username    ::_s_buffer { nullptr };
 char* AppBackend::Buffer::Password    ::_s_buffer { nullptr };

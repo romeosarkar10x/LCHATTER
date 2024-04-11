@@ -10,7 +10,7 @@
 #include "ConnectionRequest.hpp"
 #include "../Crypto/Hash/MD5_Digest.hpp"
 #include "../Chat/ChatMessage.hpp"
-#include "../File/Traits.hpp"
+#include "../File/Trait.hpp"
 
 #include "../Other/Socket/Udp/AppSignature.hpp"
 #include "../Other/Socket/Udp/UdpMessage/UdpMessage.hpp"

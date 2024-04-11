@@ -21,8 +21,8 @@ public:
   SOCKET    _m_socket;
   Address   _m_socket_address;
   
-  char*     _m_buffer;
-  int       _m_offset;
+  char*         _m_buffer;
+  unsigned int  _m_offset;
   
   void _m_init();
   void _m_destroy();
@@ -32,7 +32,7 @@ public:
   char*           get_buffer();
   static int      get_buffer_size();
   
-  int             get_offset();
+  unsigned int    get_offset();
   void            reset_offset();
   void            increment_offset(int amount);
 

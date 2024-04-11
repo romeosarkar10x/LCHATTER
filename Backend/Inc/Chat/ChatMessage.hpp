@@ -30,8 +30,8 @@ public:
 
   bool operator<(ChatMessage& rhs);
   
-  int serialization_length() const;
-  void serialize(char* buffer, int& offset)   const;
+  unsigned int serialization_length() const;
+  void serialize(char* buffer, unsigned int& offset)   const;
 
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

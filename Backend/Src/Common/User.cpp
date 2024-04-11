@@ -21,13 +21,13 @@ const String& User::get_id() const { return _m_id.to_string(); }
 
 bool User::operator==(const User& rhs) const { return (_m_id == rhs._m_id); }
 
-int User::serialization_length() const
+unsigned int User::serialization_length() const
 {
   return Serializer::serialization_length(_m_name) +
     Serializer::serialization_length(_m_id);
 }
 
-void User::serialize(char* buffer, int& offset) const
+void User::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_name, buffer, offset);
   Serializer::serialize(_m_id, buffer, offset);

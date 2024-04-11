@@ -19,7 +19,7 @@ class AppBackend
 public:
   class State
   {
-
+    friend class AppBackend;
   public:
     enum Enum_State : char
     {

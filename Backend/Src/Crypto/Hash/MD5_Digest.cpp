@@ -63,12 +63,12 @@ const String& MD5_Digest::to_string() const
 
 bool MD5_Digest::operator==(const MD5_Digest& rhs) const { return (std::memcmp(_m_buffer, rhs._m_buffer, 16) == 0); }
 
-int MD5_Digest::serialization_length() const
+unsigned int MD5_Digest::serialization_length() const
 {
   return Serializer::serialization_length(_m_buffer);
 }
 
-void MD5_Digest::serialize(char* buffer, int& offset) const
+void MD5_Digest::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_buffer, buffer, offset);
 }

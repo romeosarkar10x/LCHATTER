@@ -38,13 +38,13 @@ void Address::set_ip_address(const Address& addr) { _m_addr.sin_addr = addr._m_a
 
 String Address::to_string() const { return "{" + get_ip_address() + ":" + get_port() + "}"; }
 
-int Address::serialization_length() const
+unsigned int Address::serialization_length() const
 {
   return Serializer::serialization_length(_m_addr.sin_port)+ 
     Serializer::serialization_length(_m_addr.sin_addr.s_addr); 
 }
 
-void Address::serialize(char* buffer, int& offset) const
+void Address::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_addr.sin_port, buffer, offset);
   Serializer::serialize(_m_addr.sin_addr.s_addr, buffer, offset); 

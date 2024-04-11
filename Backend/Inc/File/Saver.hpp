@@ -11,7 +11,7 @@ class Saver
   bool            _m_is_initialized;
 
   char*           _m_buffer;
-  int             _m_offset;
+  unsigned int    _m_offset;
 
 public:
   

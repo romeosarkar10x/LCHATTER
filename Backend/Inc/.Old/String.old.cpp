@@ -103,7 +103,7 @@ public:
   operator const char*() const noexcept { return _m_p; }
   operator const void*() const noexcept { return _m_p; }
   
-  int serialize(char* buffer) const
+  unsigned int serialize(char* buffer) const
   {
     if(_m_p == nullptr)
     {
@@ -115,7 +115,7 @@ public:
     return _m_length + 1;
   }
 
-  int serialize(char* buffer, int offset) const { return serialize(buffer + offset); }
+  unsigned int serialize(char* buffer, int offset) const { return serialize(buffer + offset); }
 
   int deserialize(const char* buffer)
   {

@@ -22,14 +22,14 @@ void ConnectionRequest::set_state(State::Enum_State state) { _m_state.set_state(
 
 bool ConnectionRequest::operator<(const ConnectionRequest& rhs) { return _m_user.get_id().operator<(rhs._m_user.get_id()); }
 
-int ConnectionRequest::serialization_length() const
+unsigned int ConnectionRequest::serialization_length() const
 {
   return Serializer::serialization_length(_m_user) +
     Serializer::serialization_length(_m_addr) +
     Serializer::serialization_length(_m_timepoint);
 }
 
-void ConnectionRequest::serialize(char* buffer, int& offset) const
+void ConnectionRequest::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_user, buffer, offset);
   Serializer::serialize(_m_addr, buffer, offset);

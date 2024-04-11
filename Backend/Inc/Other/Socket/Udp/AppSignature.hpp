@@ -15,8 +15,8 @@ public:
   AppSignature(const char* sig) :
     _M_sig { sig } {}
 
-  int serialization_length() const;
-  void serialize(char* const buffer, int& offset) const;
+  unsigned int serialization_length() const;
+  void serialize(char* const buffer, unsigned int& offset) const;
 
   static const AppSignature& get_signature();
   bool is_match(const char* buffer) const;

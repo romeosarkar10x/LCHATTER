@@ -11,6 +11,11 @@ OBJ_EXTENSION:=o
 DEP_EXTENSION:=d
 
 CC=g++
+CXXFLAGS=-c -std=c++20 -Wall -Wshadow -Wunused-result -Wextra -Wpedantic \
+-Wconversion -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused \
+-Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wformat=2 \
+-Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wuseless-cast \
+-ftemplate-depth=1000000 -fconcepts-diagnostics-depth=1000000
 
 
 SRC_FILES:=${shell find ${SRC_DIRECTORY} -name *.${SRC_EXTENSION} }
@@ -69,7 +74,7 @@ include ${DEP_INTERMEDIATE_FILES}
 
 
 ${OBJ_DIRECTORY}/%.${OBJ_EXTENSION}: ${DEP_DIRECTORY}/%.${DEP_EXTENSION}
-	g++ -c -std=c++20 -o $@ ${call func,$@}
+	g++ $(CXXFLAGS) -o $@ ${call func,$@}
 # echo "Success!" ; \
 	# echo "$@ + $* + $<"
 

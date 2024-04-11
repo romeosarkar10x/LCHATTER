@@ -12,7 +12,7 @@ void Udp_BASE::_m_init()
 
   WindowsSocketsApi::init();
 
-  _m_offset = 0;
+  _m_offset = 0U;
   _m_buffer = new char [_S_buffer_size];
 
   _m_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -55,7 +55,7 @@ const Address&  Udp_BASE::get_socket_address() const { assert(_m_is_initialized)
 char*         Udp_BASE::get_buffer() { assert(_m_is_initialized); return _m_buffer; }
 int    Udp_BASE::get_buffer_size() { return _S_buffer_size; }
 
-int Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
+unsigned int Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
 void Udp_BASE::reset_offset() { assert(_m_is_initialized); _m_offset = 0; }
 void Udp_BASE::increment_offset(int amount) { assert(_m_is_initialized); _m_offset += amount; }
 

@@ -28,14 +28,14 @@ void UdpSender_BASE::send(const Address& receiver_addr)
 
   _s_UdpSender_BASE_Logger << Logger::timestamp << "[#" << _m_id << "] SEND " << receiver_addr << " @ OFFSET: " << _m_offset << Logger::endl;
   
-  for(int i = 0; i < _m_offset; i++)
+  for(unsigned int s = 0; s < _m_offset; s++)
   {
     auto f = _s_UdpSender_BASE_Logger->flags();
     _s_UdpSender_BASE_Logger << std::hex
-      << static_cast<u_int>(*(reinterpret_cast<u_char*>(_m_buffer) + i));
+      << static_cast<u_int>(*(reinterpret_cast<u_char*>(_m_buffer) + s));
     _s_UdpSender_BASE_Logger->flags(f);
     
-    char c = *(reinterpret_cast<char*>(_m_buffer) + i);
+    char c = *(reinterpret_cast<char*>(_m_buffer) + s);
     if(31 < c && c < 127) { _s_UdpSender_BASE_Logger << "[" << c << "]"; }
     
     _s_UdpSender_BASE_Logger << " ";

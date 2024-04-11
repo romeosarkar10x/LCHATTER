@@ -26,8 +26,8 @@ public:
 
     Type(Enum_Type type);
     
-    int serialization_length() const;
-    void serialize(char* buffer, int& offset) const;
+    unsigned int serialization_length() const;
+    void serialize(char* buffer, unsigned int& offset) const;
 
     int deserialize(const char* buffer);
     int deserialize(const char* buffer, int offset);
@@ -46,8 +46,8 @@ public:
 
   Type get_type() const;
 
-  int serialization_length() const;
-  void serialize(char* buffer, int& offset) const;
+  unsigned int serialization_length() const;
+  void serialize(char* buffer, unsigned int& offset) const;
 
   int deserialize(const char* buffer);
   int deserialize(const char* buffer, int offset);

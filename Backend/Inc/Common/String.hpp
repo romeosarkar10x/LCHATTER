@@ -7,8 +7,8 @@ class String
 {
   friend String operator+(const char* lhs, const String& rhs);
 
-  char*   _m_p;
-  int     _m_length;
+  char*         _m_p;
+  unsigned int  _m_length;
 
   static const int _S_threshold_length = sizeof(_m_p); /// small string optimization
 
@@ -20,7 +20,7 @@ class String
 public:
   String();
   String(const char* const s);
-  String(const char* const s, const int length);
+  String(const char* const s, const unsigned int length);
 
   String(const std::string& rhs);
   String(const String& rhs);
@@ -41,13 +41,13 @@ public:
   bool operator==(const String& rhs) const;
   bool operator!=(const String& rhs) const;
   
-  const char* get_buffer() const noexcept;
-  int         get_length() const noexcept;
+  const char*   get_buffer() const noexcept;
+  unsigned int  get_length() const noexcept;
 
   operator const char*() const noexcept;
   
-  int serialization_length() const;
-  void serialize(char* buffer, int& offset) const;
+  unsigned int serialization_length() const;
+  void serialize(char* buffer, unsigned int& offset) const;
 
   int deserialize(const char* const buffer);
   int deserialize(const char* buffer, int offset);

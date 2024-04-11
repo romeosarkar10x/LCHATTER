@@ -17,6 +17,8 @@ public:
   App();
   ~App() = default;
 
+  static App app;
+
   void StartUp();
   void Update();
 
@@ -35,6 +37,8 @@ private:
   ImFont *h1Font, *h2Font;
   ImGuiWindowFlags mainWindowFlag;
 };
+
+App App::app {};
 
 bool showAddConnectionForm = false;
 bool showConnectionRequestWindow = false;
@@ -105,7 +109,8 @@ void App::StartUp()
   // h1Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 48.0f);
   // h2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 32.0f);
 
-  io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.regular.ttf", 24.0f);
+    io.Fonts->AddFontFromFileTTF("assets/fonts/HelveticaNeueLight.otf", 20.0f);
+  // io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.regular.ttf", 24.0f);
   h1Font = io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.bold.ttf", 48.0f);
   h2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.bold.ttf", 32.0f);
 
@@ -140,7 +145,7 @@ void App::Update()
   // Don't forget to pop the style variable to reset the padding back to default for subsequent windows
   // ImGui::PopStyleVar(2);
 
-  // ImGui::ShowDemoWindow();
+  ImGui::ShowDemoWindow();
 }
 
 // The callbacks are updated and called BEFORE the Update loop is entered
@@ -182,7 +187,8 @@ void App::KeyCallback(GLFWwindow *window, int key, int scancode, int actions, in
 void App::ShowLoginWindow()
 {
   static int focus = 0;
-  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll;
+  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
+    ImGuiInputTextFlags_CallbackCharFilter;
 
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
@@ -195,8 +201,24 @@ void App::ShowLoginWindow()
     {
       ImGui::BeginChild("ShowLoginWindow", childWindowSize);
 
-      if (ImGui::InputText("Username", AppBackend::Buffer::Username::get_buffer(),
-                           AppBackend::Buffer::Username::get_buffer_size(), input_text_flags))
+      auto callback = [] (ImGuiInputTextCallbackData* data) -> int
+      {
+        // printf("hello world\n");
+        // printf("%hhd ", data->EventChar);
+        printf("callback ");
+        printf("%hd ", data->EventChar);
+
+        if('A' <= data->EventChar && data->EventChar <= 'Z')
+        {
+          data->EventChar += 32;
+        }
+        // data->EventChar = data->EventChar;
+        return 0;
+      };
+
+      if (ImGui::InputTextWithHint("##Username", "Username", AppBackend::Buffer::Username::get_buffer(),
+                           AppBackend::Buffer::Username::get_buffer_size(), input_text_flags, callback))
+                           
       {
         focus = 1;
       }
@@ -207,7 +229,7 @@ void App::ShowLoginWindow()
         focus = 2;
       }
 
-      if (ImGui::InputText("Password", AppBackend::Buffer::Password::get_buffer(),
+      if (ImGui::InputTextWithHint("##Password", "******", AppBackend::Buffer::Password::get_buffer(),
                            AppBackend::Buffer::Password::get_buffer_size(),
                            ImGuiInputTextFlags_Password | input_text_flags))
       {
@@ -345,26 +367,49 @@ void App::ShowConnectionRequestWindow()
   ImGui::PopStyleColor(4);
 }
 
+
+
+bool operator!=(const ImVec2& a, const ImVec2& b)
+{
+  return (a.x != b.x || a.y != b.y);
+}
+
 void App::ShowChatWindow()
 {
+  static auto viewport_size = ImGui::GetMainViewport()->Size;
   connections = AppBackend::_s_connections;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
-    ImVec2 windowSize = ImGui::GetContentRegionAvail();
-    float leftWidth = windowSize.x * 0.4f;  // 30% for contacts
-    float rightWidth = windowSize.x * 0.6f; // 70% for chats
+    ImGui::PopStyleVar(2);
+    
+    // ImVec2 windowSize = ImGui::GetContentRegionAvail();
+    // ImVec2 windowSize = ImGui::GetMainViewport()->Size;
+    static float leftWidth = viewport_size.x * 0.3f;  // 30% for contacts
+    float rightWidth = viewport_size.x - leftWidth; // 70% for chats
+
+    if(viewport_size != ImGui::GetMainViewport()->Size)
+    {
+      viewport_size = ImGui::GetMainViewport()->Size;
+      leftWidth = viewport_size.x * (leftWidth / (leftWidth + rightWidth));
+      rightWidth = viewport_size.x - leftWidth;
+    }
+
+    auto windowSize = viewport_size;
 
     // Left
     {
-      ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y));
+      ImGui::BeginChild("LeftParent", ImVec2(leftWidth, windowSize.y), ImGuiChildFlags_Border);
 
       // Display Port Number
       // char port[6];
       // std::snprintf(port, 6, "%u", AppBackend::_s_receiver.get_socket_address().get_port());
 
-      ImGui::Text(String("Id : ") + AppBackend::_s_me.get_id());
-      ImGui::Text(String("Port : ") + AppBackend::_s_receiver.get_socket_address().get_port());
+      ImGui::TextWrapped(String("Id : ") + AppBackend::_s_me.get_id());
+      ImGui::TextWrapped(String("Port : ") + AppBackend::_s_receiver.get_socket_address().get_port());
       if (ImGui::IsItemClicked())
       {
         // Copy the text to the clipboard
@@ -411,8 +456,12 @@ void App::ShowChatWindow()
 
     // Right
     {
+
+      // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
+      // ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
       // ImGui::BeginGroup();
-      ImGui::BeginChild("RightParent", ImVec2(rightWidth, windowSize.y));
+      ImGui::BeginChild("RightParent", ImVec2(rightWidth, windowSize.y), ImGuiChildFlags_Border);
+
       if (selectedConnectionIndex == -1)
       {
         TextWithAlignment("Select a chat to start messaging", ImVec2(1, 1));
@@ -513,6 +562,48 @@ void App::ShowChatWindow()
         }
       }
       ImGui::EndChild();
+    }
+
+    auto mouse_pos = ImGui::GetMousePos(); // absolute position
+    float edge_x = leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x; // absolute position
+    
+    auto is_nearby = [] (float pos_x, float mouse_pos_x, float diff) -> bool
+    {
+      return (pos_x - diff / 2.0 <= mouse_pos_x && mouse_pos_x <= pos_x + diff / 2.0);
+    };
+
+    // printf("(%f, %f)", mouse_pos.x, mouse_pos.y);
+    static bool resize = false;
+    
+    if(resize || (is_nearby(edge_x, mouse_pos.x, 4.0f) && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow | ImGuiFocusedFlags_ChildWindows)))
+    {
+      ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+      
+      resize = ImGui::IsMouseDown(ImGuiDir_Left);
+
+      if(resize)
+      {
+        auto draw_list = ImGui::GetWindowDrawList();
+        draw_list->AddLine(
+          { leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x, ImGui::GetWindowPos().y },
+          { leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x, ImGui::GetWindowPos().y + ImGui::GetWindowHeight() },
+          IM_COL32(255, 0, 0, 255),
+          4.0f
+        );
+        
+        float child_window_size_x =  ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetStyle().WindowPadding.x;
+
+        if(child_window_size_x < 450)
+        {
+          child_window_size_x = 450;
+        }
+        else if(child_window_size_x > 800)
+        {
+          child_window_size_x = 800;
+        }
+
+        leftWidth = child_window_size_x;
+      }
     }
   }
   ImGui::End();

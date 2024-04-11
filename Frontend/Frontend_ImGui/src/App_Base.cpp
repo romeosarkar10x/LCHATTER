@@ -51,6 +51,17 @@ public:
     glfwSetCursorPosCallback(window, &Derived::CursorPosCallback);
     glfwSetKeyCallback(window, &Derived::KeyCallback);
 
+    // auto callback = [] (GLFWwindow* window, int width, int height) -> void
+    // {
+    //   printf("\x1b[32m(%d, %d)\x1b[m ", width, height);
+    //   fflush(stdout);
+    //   // glfwSetWindowSize(window, width, height);
+    //   glViewport(0, 0, width, height);
+    // };
+
+    // glfwSetWindowSizeCallback(window, reinterpret_cast<GLFWwindowsizefun>(&Derived::SetWindowSizeCallback));
+    glfwSetFramebufferSizeCallback(window, &Derived::SetWindowSizeCallback);
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -76,32 +87,41 @@ public:
     // SetTheme(colors, "cyberpunk");
     // SetTheme(colors, "node");
     // SetTheme(colors, "highcontrast");
+    
+    ImVec2 zero = { 0.0f, 0.0f };
+    style.WindowPadding = zero;
+    style.FramePadding = zero;
+    style.CellPadding = zero;
+    style.ItemSpacing = zero;
+    style.ItemInnerSpacing = zero;
+    style.TouchExtraPadding = zero;
 
-    style.WindowPadding = ImVec2(10.0f, 10.0f);
-    style.FramePadding = ImVec2(6.0f, 4.0f);
-    style.CellPadding = ImVec2(8.0f, 8.0f);
-    style.ItemSpacing = ImVec2(8.0f, 8.0f);
-    style.ItemInnerSpacing = ImVec2(8.0f, 8.0f);
-    style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
-    style.IndentSpacing = 20;
-    style.ScrollbarSize = 12;
-    style.GrabMinSize = 8;
-    style.WindowBorderSize = 0;
-    style.ChildBorderSize = 0;
-    style.PopupBorderSize = 0;
-    style.FrameBorderSize = 0;
-    style.TabBorderSize = 0;
-    style.WindowRounding = 5;
-    style.ChildRounding = 3;
-    style.FrameRounding = 3;
-    style.PopupRounding = 3;
-    style.ScrollbarRounding = 6;
-    style.GrabRounding = 3;
-    style.LogSliderDeadzone = 4;
-    style.TabRounding = 3;
+    // style.WindowPadding = ImVec2(10.0f, 10.0f);
+    // style.FramePadding = ImVec2(6.0f, 4.0f);
+    // style.CellPadding = ImVec2(8.0f, 8.0f);
+    // style.ItemSpacing = ImVec2(8.0f, 8.0f);
+    // style.ItemInnerSpacing = ImVec2(8.0f, 8.0f);
+    // style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
+
+    // style.IndentSpacing = 20;
+    // style.ScrollbarSize = 12;
+    // style.GrabMinSize = 8;
+    // style.WindowBorderSize = 0;
+    // style.ChildBorderSize = 0;
+    // style.PopupBorderSize = 0;
+    // style.FrameBorderSize = 0;
+    // style.TabBorderSize = 0;
+    // style.WindowRounding = 5;
+    // style.ChildRounding = 3;
+    // style.FrameRounding = 3;
+    // style.PopupRounding = 3;
+    // style.ScrollbarRounding = 6;
+    // style.GrabRounding = 3;
+    // style.LogSliderDeadzone = 4;
+    // style.TabRounding = 3;
 
     // final scaling
-    style.ScaleAllSizes(2.0f);
+    // style.ScaleAllSizes(2.0f);
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -465,17 +485,80 @@ public:
       colors[ImGuiCol_ModalWindowDimBg] = ImColor(0, 0, 0);
     }
   }
+  
+  static void SetWindowSizeCallback(GLFWwindow* w, int width, int height)
+  {
+    printf("\x1b[32mH\x1b[m");
+    int prev_width, prev_height;
+    printf("%p ", w);
+    fflush(stdout);
+
+    glfwGetWindowSize(w, &prev_width, &prev_height);
+
+    printf("\x1b[32m(%d, %d)\x1b[m => \x1b[31m(%d, %d)\x1b[m ", prev_width, prev_height, width, height);
+    fflush(stdout);
+
+
+    glfwSetWindowSize(w, width, height);
+    
+    // glfwSetWindowSize(w, height, width);
+    Derived::app.Render();
+  }
+
+  void Render()
+  {
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Main loop of the underlying app
+    Update();
+    AppBackend::update();
+
+    // Rendering
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+                  clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // Update and Render additional Platform Windows
+    // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste
+    // this code elsewhere.
+    //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+      GLFWwindow *backup_current_context = glfwGetCurrentContext();
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+      glfwMakeContextCurrent(backup_current_context);
+    }
+    glfwSwapBuffers(window);
+  }
 
   void Run()
   {
     // Initialize the underlying app
     AppBackend::init();
     StartUp();
-
+    int cnt = 0;
     while (!glfwWindowShouldClose(window))
     {
+      printf("%d ", cnt++);
+      fflush(stdout);
       // Poll events like key presses, mouse movements etc.
+      
+
       glfwPollEvents();
+
+      printf("poll done! ");
+      fflush(stdout);
+      // glfwWaitEvents();
 
       // Start the Dear ImGui frame
       ImGui_ImplOpenGL3_NewFrame();

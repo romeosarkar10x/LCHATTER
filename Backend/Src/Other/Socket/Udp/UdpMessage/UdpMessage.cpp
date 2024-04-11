@@ -3,12 +3,12 @@
 
 UdpMessage::Type::Type(Enum_Type type) : _m_t { type } {};
 
-int UdpMessage::Type::serialization_length() const
+unsigned int UdpMessage::Type::serialization_length() const
 {
   return Serializer::serialization_length(_m_t);
 }
 
-void UdpMessage::Type::serialize(char* buffer, int& offset) const
+void UdpMessage::Type::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_t, buffer, offset);
   // *reinterpret_cast<Enum_Type*>(buffer) = _m_t;
@@ -31,12 +31,12 @@ UdpMessage::UdpMessage(Type m_type) : _m_type { m_type } {}
 UdpMessage::Type UdpMessage::get_type() const { return _m_type; }
 
 
-int UdpMessage::serialization_length() const
+unsigned int UdpMessage::serialization_length() const
 {
   return Serializer::serialization_length(_m_type);
 }
 
-void UdpMessage::serialize(char* const buffer, int& offset) const
+void UdpMessage::serialize(char* const buffer, unsigned int& offset) const
 {
   Serializer::serialize(_m_type, buffer, offset);
 }

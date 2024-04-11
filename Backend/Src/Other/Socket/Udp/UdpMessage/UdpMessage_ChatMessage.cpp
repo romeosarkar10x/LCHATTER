@@ -5,13 +5,13 @@ UdpMessage_ChatMessage::UdpMessage_ChatMessage(const ChatMessage& m) :
   UdpMessage { UdpMessage::Type::CHAT_MESSAGE },
   ChatMessage { m } {}
 
-int UdpMessage_ChatMessage::serialization_length() const
+unsigned int UdpMessage_ChatMessage::serialization_length() const
 {
   return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) +
     Serializer::serialization_length(static_cast<const ChatMessage&>(*this));
 }
 
-void UdpMessage_ChatMessage::serialize(char* buffer, int& offset) const
+void UdpMessage_ChatMessage::serialize(char* buffer, unsigned int& offset) const
 {
   Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
   Serializer::serialize(static_cast<const ChatMessage&>(*this), buffer, offset);

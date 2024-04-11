@@ -43,7 +43,7 @@ bool UdpReceiver_BASE::receive()
   }
 
   reinterpret_cast<char*>(_m_buffer)[ret] = '\0';
-  _m_offset = ret;
+  _m_offset = static_cast<unsigned int>(ret);
 
   _s_UdpReceiver_BASE_Logger << Logger::timestamp << "[#" << _m_id << "].RECEIVE " << _m_sender_addr << " @ "
     << ", _m_offset: " << _m_offset << Logger::endl;

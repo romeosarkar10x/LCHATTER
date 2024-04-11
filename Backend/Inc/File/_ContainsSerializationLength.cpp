@@ -26,7 +26,7 @@ template<class T>
 
 struct foo {};
 struct foo_with_incorrect_serialization_length { void serialization_length() const; };
-struct foo_with_serialization_length { int serialization_length() const; };
+struct foo_with_serialization_length { unsigned int serialization_length() const; };
 
 int main()
 {
