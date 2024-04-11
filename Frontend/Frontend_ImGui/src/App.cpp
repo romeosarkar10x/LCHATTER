@@ -38,7 +38,7 @@ private:
   ImGuiWindowFlags mainWindowFlag;
 };
 
-App App::app {};
+App App::app{};
 
 bool showAddConnectionForm = false;
 bool showConnectionRequestWindow = false;
@@ -109,7 +109,7 @@ void App::StartUp()
   // h1Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 48.0f);
   // h2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/Noto_Sans/NotoSans-VariableFont_wdth,wght.ttf", 32.0f);
 
-    io.Fonts->AddFontFromFileTTF("assets/fonts/HelveticaNeueLight.otf", 20.0f);
+  io.Fonts->AddFontFromFileTTF("assets/fonts/HelveticaNeueLight.otf", 20.0f);
   // io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.regular.ttf", 24.0f);
   h1Font = io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.bold.ttf", 48.0f);
   h2Font = io.Fonts->AddFontFromFileTTF("assets/fonts/montserrat.bold.ttf", 32.0f);
@@ -136,6 +136,7 @@ void App::Update()
   if (AppBackend::State::get_state() == AppBackend::State::NOT_LOGGED_IN)
   {
     ShowLoginWindow();
+    // renderLoginWindow(app.window);
   }
   else
   {
@@ -145,7 +146,7 @@ void App::Update()
   // Don't forget to pop the style variable to reset the padding back to default for subsequent windows
   // ImGui::PopStyleVar(2);
 
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
 }
 
 // The callbacks are updated and called BEFORE the Update loop is entered
@@ -188,37 +189,44 @@ void App::ShowLoginWindow()
 {
   static int focus = 0;
   ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
-    ImGuiInputTextFlags_CallbackCharFilter;
+                                         ImGuiInputTextFlags_CallbackCharFilter;
 
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
-    ImVec2 childWindowSize = ImVec2(400, 220);
+    ImVec2 childWindowSize =
+        ImVec2(300, ImGui::GetFrameHeightWithSpacing() * 3 + ImGui::GetTextLineHeightWithSpacing());
 
     ImGui::SetCursorPos(ImVec2((windowSize.x - childWindowSize.x) / 2, (windowSize.y - childWindowSize.y) / 2));
 
     // Login Child Window
     {
-      ImGui::BeginChild("ShowLoginWindow", childWindowSize);
+      ImGui::BeginChild("ShowLoginWindow", childWindowSize, ImGuiChildFlags_Border);
 
-      auto callback = [] (ImGuiInputTextCallbackData* data) -> int
-      {
+      auto callback = [](ImGuiInputTextCallbackData *data) -> int {
         // printf("hello world\n");
         // printf("%hhd ", data->EventChar);
         printf("callback ");
         printf("%hd ", data->EventChar);
 
-        if('A' <= data->EventChar && data->EventChar <= 'Z')
+        if ('A' <= data->EventChar && data->EventChar <= 'Z')
         {
           data->EventChar += 32;
         }
         // data->EventChar = data->EventChar;
         return 0;
       };
+      // Get the available width in the parent window
+      ImVec2 availableSpace = ImGui::GetContentRegionAvail();
+      // Use the available width but keep the default height for the input text
+      ImVec2 inputSize = ImVec2(availableSpace.x, 0);
 
+      // Before your InputTextWithHint, call SetNextItemWidth with -1.0f to fill the space
+      ImGui::SetNextItemWidth(-1.0f);
       if (ImGui::InputTextWithHint("##Username", "Username", AppBackend::Buffer::Username::get_buffer(),
-                           AppBackend::Buffer::Username::get_buffer_size(), input_text_flags, callback))
-                           
+                                   AppBackend::Buffer::Username::get_buffer_size(),
+                                   input_text_flags | ImGuiInputTextFlags_AllowTabInput, callback))
+
       {
         focus = 1;
       }
@@ -229,9 +237,11 @@ void App::ShowLoginWindow()
         focus = 2;
       }
 
+      ImGui::SetNextItemWidth(-1.0f);
       if (ImGui::InputTextWithHint("##Password", "******", AppBackend::Buffer::Password::get_buffer(),
-                           AppBackend::Buffer::Password::get_buffer_size(),
-                           ImGuiInputTextFlags_Password | input_text_flags))
+                                   AppBackend::Buffer::Password::get_buffer_size(),
+                                   ImGuiInputTextFlags_Password |
+                                       input_text_flags ^ ImGuiInputTextFlags_CallbackCharFilter))
       {
         AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::LOGIN);
         focus = 0;
@@ -367,9 +377,7 @@ void App::ShowConnectionRequestWindow()
   ImGui::PopStyleColor(4);
 }
 
-
-
-bool operator!=(const ImVec2& a, const ImVec2& b)
+bool operator!=(const ImVec2 &a, const ImVec2 &b)
 {
   return (a.x != b.x || a.y != b.y);
 }
@@ -379,19 +387,19 @@ void App::ShowChatWindow()
   static auto viewport_size = ImGui::GetMainViewport()->Size;
   connections = AppBackend::_s_connections;
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0.0f, 0.0f });
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
 
   if (ImGui::Begin("MainWindow", nullptr, mainWindowFlag))
   {
     ImGui::PopStyleVar(2);
-    
+
     // ImVec2 windowSize = ImGui::GetContentRegionAvail();
     // ImVec2 windowSize = ImGui::GetMainViewport()->Size;
-    static float leftWidth = viewport_size.x * 0.3f;  // 30% for contacts
-    float rightWidth = viewport_size.x - leftWidth; // 70% for chats
+    static float leftWidth = viewport_size.x * 0.3f; // 30% for contacts
+    float rightWidth = viewport_size.x - leftWidth;  // 70% for chats
 
-    if(viewport_size != ImGui::GetMainViewport()->Size)
+    if (viewport_size != ImGui::GetMainViewport()->Size)
     {
       viewport_size = ImGui::GetMainViewport()->Size;
       leftWidth = viewport_size.x * (leftWidth / (leftWidth + rightWidth));
@@ -564,40 +572,40 @@ void App::ShowChatWindow()
       ImGui::EndChild();
     }
 
-    auto mouse_pos = ImGui::GetMousePos(); // absolute position
+    auto mouse_pos = ImGui::GetMousePos();                                                  // absolute position
     float edge_x = leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x; // absolute position
-    
-    auto is_nearby = [] (float pos_x, float mouse_pos_x, float diff) -> bool
-    {
+
+    auto is_nearby = [](float pos_x, float mouse_pos_x, float diff) -> bool {
       return (pos_x - diff / 2.0 <= mouse_pos_x && mouse_pos_x <= pos_x + diff / 2.0);
     };
 
     // printf("(%f, %f)", mouse_pos.x, mouse_pos.y);
     static bool resize = false;
-    
-    if(resize || (is_nearby(edge_x, mouse_pos.x, 4.0f) && ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow | ImGuiFocusedFlags_ChildWindows)))
+
+    if (resize || (is_nearby(edge_x, mouse_pos.x, 4.0f) &&
+                   ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow | ImGuiFocusedFlags_ChildWindows)))
     {
       ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-      
+
       resize = ImGui::IsMouseDown(ImGuiDir_Left);
 
-      if(resize)
+      if (resize)
       {
         auto draw_list = ImGui::GetWindowDrawList();
         draw_list->AddLine(
-          { leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x, ImGui::GetWindowPos().y },
-          { leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x, ImGui::GetWindowPos().y + ImGui::GetWindowHeight() },
-          IM_COL32(255, 0, 0, 255),
-          4.0f
-        );
-        
-        float child_window_size_x =  ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetStyle().WindowPadding.x;
+            {leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x, ImGui::GetWindowPos().y},
+            {leftWidth + ImGui::GetWindowPos().x + ImGui::GetStyle().WindowPadding.x,
+             ImGui::GetWindowPos().y + ImGui::GetWindowHeight()},
+            IM_COL32(255, 0, 0, 255), 4.0f);
 
-        if(child_window_size_x < 450)
+        float child_window_size_x =
+            ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetStyle().WindowPadding.x;
+
+        if (child_window_size_x < 450)
         {
           child_window_size_x = 450;
         }
-        else if(child_window_size_x > 800)
+        else if (child_window_size_x > 800)
         {
           child_window_size_x = 800;
         }

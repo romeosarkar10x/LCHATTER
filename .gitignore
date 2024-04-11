@@ -16,6 +16,7 @@
 *.o
 *.d
 *.ini
+*.dat
 
 *.rough
 

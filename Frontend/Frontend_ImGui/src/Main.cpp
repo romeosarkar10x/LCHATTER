@@ -2,11 +2,11 @@
 
 int main()
 {
-//   FreeConsole();
-//   App chatApp;
-//   chatApp.Run();
-    // App::Run();
-    App::app.Run();
+  //   FreeConsole();
+  //   App chatApp;
+  //   chatApp.Run();
+  // App::Run();
+  App::app.Run();
   return 0;
 }
 

@@ -42,6 +42,8 @@ public:
     if (window == NULL)
       std::exit(1);
 
+    glfwSetWindowSizeLimits(window, 500, 500, GLFW_DONT_CARE, GLFW_DONT_CARE);
+
     // glfwSetWindowSize(window, 1920, 1080);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
@@ -87,8 +89,8 @@ public:
     // SetTheme(colors, "cyberpunk");
     // SetTheme(colors, "node");
     // SetTheme(colors, "highcontrast");
-    
-    ImVec2 zero = { 0.0f, 0.0f };
+
+    ImVec2 zero = {0.0f, 0.0f};
     style.WindowPadding = zero;
     style.FramePadding = zero;
     style.CellPadding = zero;
@@ -485,23 +487,21 @@ public:
       colors[ImGuiCol_ModalWindowDimBg] = ImColor(0, 0, 0);
     }
   }
-  
-  static void SetWindowSizeCallback(GLFWwindow* w, int width, int height)
+
+  static void SetWindowSizeCallback(GLFWwindow *w, int width, int height)
   {
-    printf("\x1b[32mH\x1b[m");
-    int prev_width, prev_height;
-    printf("%p ", w);
-    fflush(stdout);
+    // printf("\x1b[32mH\x1b[m");
+    // int prev_width, prev_height;
+    // printf("%p ", w);
+    // fflush(stdout);
 
-    glfwGetWindowSize(w, &prev_width, &prev_height);
+    // glfwGetWindowSize(w, &prev_width, &prev_height);
 
-    printf("\x1b[32m(%d, %d)\x1b[m => \x1b[31m(%d, %d)\x1b[m ", prev_width, prev_height, width, height);
-    fflush(stdout);
-
+    // printf("\x1b[32m(%d, %d)\x1b[m => \x1b[31m(%d, %d)\x1b[m ", prev_width, prev_height, width, height);
+    // fflush(stdout);
 
     glfwSetWindowSize(w, width, height);
-    
-    // glfwSetWindowSize(w, height, width);
+
     Derived::app.Render();
   }
 
@@ -522,7 +522,7 @@ public:
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-                  clear_color.w);
+                 clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -549,15 +549,14 @@ public:
     int cnt = 0;
     while (!glfwWindowShouldClose(window))
     {
-      printf("%d ", cnt++);
-      fflush(stdout);
+      // printf("%d ", cnt++);
+      // fflush(stdout);
       // Poll events like key presses, mouse movements etc.
-      
 
       glfwPollEvents();
 
-      printf("poll done! ");
-      fflush(stdout);
+      // printf("poll done! ");
+      // fflush(stdout);
       // glfwWaitEvents();
 
       // Start the Dear ImGui frame
@@ -593,6 +592,9 @@ public:
       }
       glfwSwapBuffers(window);
     }
+
+    // printf("Exiting..");
+    AppBackend::save();
   }
 
   void Update()
