@@ -33,43 +33,26 @@ UdpMessage* UdpReceiver::receive()
   switch(type)
   {
   case UdpMessage::Type::CONNECTION_REQUEST:
-  {
-    auto tmp = new UdpMessage_ConnectionRequest {};
-    auto type = tmp->get_type();
-    std::cout << type << std::endl;
-    Deserializer::deserialize(*tmp, buffer, offset);
-    m = tmp;
-    type = m->get_type();
-    std::cout << type << std::endl;
+    m = new UdpMessage_ConnectionRequest {};
     break;
-  }
 
   case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
-  {
-    auto* tmp = new UdpMessage_ConnectionRequest_Accepted {};
-    Deserializer::deserialize(*tmp, buffer, offset);
-    m = tmp;
+    m = new UdpMessage_ConnectionRequest_Accepted {};
     break;
-  }
 
   case UdpMessage::Type::CONNECTION_REQUEST_REJECTED:
-  {
-
-  }
-    // return new UdpMessage_ConnectionRequest_Rejected {};
+    m = new UdpMessage_ConnectionRequest_Rejected {};
+    break;
 
   case UdpMessage::Type::CHAT_MESSAGE:
-  {
-    auto* tmp = new UdpMessage_ChatMessage {};
-    // offset += tmp->deserialize(get_buffer(), offset);
-    Deserializer::deserialize(*tmp, buffer, offset);
-    m = tmp;
+    m = new UdpMessage_ChatMessage {};
     break;
-  }
 
   default:
     assert(false);
   }
+
+  Deserializer::deserialize(*m, buffer, offset);
   
   // std::cout << offset << " " << get_offset() << std::endl;
   assert(offset == get_offset());

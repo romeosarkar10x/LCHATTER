@@ -270,7 +270,7 @@ void App::ShowLoginWindow()
 }
 void App::AddConnectionWindow()
 {
-  strcpy(AppBackend::Buffer::IpAddress::get_buffer(), "127.0.0.1");
+  // strcpy(AppBackend::Buffer::IpAddress::get_buffer(), "127.0.0.1");
   ImGui::InputText("IP", AppBackend::Buffer::IpAddress::get_buffer(), AppBackend::Buffer::IpAddress::get_buffer_size());
   ImGui::InputText("PORT", AppBackend::Buffer::Port::get_buffer(), AppBackend::Buffer::Port::get_buffer_size());
 

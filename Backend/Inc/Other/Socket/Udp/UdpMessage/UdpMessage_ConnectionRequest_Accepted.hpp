@@ -11,6 +11,8 @@ public:
 
   UdpMessage_ConnectionRequest_Accepted(const UdpMessage_ConnectionRequest& r);
   
+  UdpMessage::Type get_type() const override { return UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED; }
+
   u_int   serialization_length() const;
   void    serialize(char* buffer, u_int& offset) const;
 

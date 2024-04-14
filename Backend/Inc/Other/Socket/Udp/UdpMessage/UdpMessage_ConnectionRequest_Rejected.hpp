@@ -9,6 +9,8 @@ class UdpMessage_ConnectionRequest_Rejected : public UdpMessage_ConnectionReques
 public:
   UdpMessage_ConnectionRequest_Rejected() = default;
 
+  UdpMessage::Type get_type() const override { return UdpMessage::Type::CONNECTION_REQUEST_REJECTED; }
+
   u_int   serialization_length() const;
   void    serialize(char* buffer, u_int& offset) const;
 
