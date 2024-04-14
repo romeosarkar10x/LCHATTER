@@ -43,15 +43,15 @@ App App::app{};
 bool showAddConnectionForm = false;
 bool showConnectionRequestWindow = false;
 
-std::vector<Connection> connections;
-std::vector<ConnectionRequest> outgoingRequests;
-std::vector<ConnectionRequest> incomingRequests;
+// std::vector<Connection> connections;
+// std::vector<ConnectionRequest> outgoingRequests;
+// std::vector<ConnectionRequest> incomingRequests;
 
 void TextWithAlignment(const char *text, ImVec2 alignment = ImVec2(0, 0), float y_padding = 0.0f,
                        ImColor color = ImColor(255, 255, 255))
 {
-  ImVec2 padding = ImGui::GetStyle().WindowPadding;
-  ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
+  // ImVec2 padding = ImGui::GetStyle().WindowPadding;
+  // ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 
   // Calculate the size without padding and item spacing
   ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -240,8 +240,8 @@ void App::ShowLoginWindow()
       ImGui::SetNextItemWidth(-1.0f);
       if (ImGui::InputTextWithHint("##Password", "******", AppBackend::Buffer::Password::get_buffer(),
                                    AppBackend::Buffer::Password::get_buffer_size(),
-                                   ImGuiInputTextFlags_Password |
-                                       input_text_flags ^ ImGuiInputTextFlags_CallbackCharFilter))
+                                   (ImGuiInputTextFlags_Password |
+                                       input_text_flags) ^ ImGuiInputTextFlags_CallbackCharFilter))
       {
         AppBackend::Frontend_Event::set_event(AppBackend::Frontend_Event::LOGIN);
         focus = 0;
@@ -292,10 +292,10 @@ void App::ShowConnectionRequestWindow()
   ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.4f, 0.4f, 0.8f, 1.0f));  // Purple for hovered tabs
   ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.3f, 0.3f, 0.6f, 1.0f));   // Darker purple for active tabs
 
-  incomingRequests = AppBackend::_s_incoming_connection_requests;
+  auto incomingRequests = AppBackend::get_incoming_requests();
   std::ranges::sort(incomingRequests, std::less<>{}, [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
-  outgoingRequests = AppBackend::_s_outgoing_connection_requests;
+  auto outgoingRequests = AppBackend::get_outgoing_requests();
   std::ranges::sort(outgoingRequests, std::less<>{}, [](const ConnectionRequest &r) { return r.get_timepoint(); });
 
   if (ImGui::Begin("Connection Requests", &showConnectionRequestWindow))
@@ -385,7 +385,7 @@ bool operator!=(const ImVec2 &a, const ImVec2 &b)
 void App::ShowChatWindow()
 {
   static auto viewport_size = ImGui::GetMainViewport()->Size;
-  connections = AppBackend::_s_connections;
+  auto connections = AppBackend::_s_connections;
 
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0.0f, 0.0f});
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});

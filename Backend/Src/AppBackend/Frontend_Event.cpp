@@ -15,7 +15,7 @@ void AppBackend::Frontend_Event::handle_event()
   {
   case Frontend_Event::LOGIN_ANONYMOUS:
     Buffer::Username::clear();
-    std::memcpy(Buffer::Username::get_buffer(), "anonymous", 10);
+    std::memcpy(Buffer::Username::get_buffer(), "ANONYMOUS", 10);
     [[ fallthrough ]];
 
   case Frontend_Event::LOGIN:
@@ -28,7 +28,7 @@ void AppBackend::Frontend_Event::handle_event()
   case Frontend_Event::SEND_CONNECTION_REQUEST:
   {
     Address receiver { Buffer::IpAddress::get_buffer(), Buffer::Port::get_buffer() };
-    _s_outgoing_connection_requests.emplace_back(User {}, receiver);
+    _s_outgoing_requests.emplace_back(User {}, receiver);
     
     auto* m = new UdpMessage_ConnectionRequest {
       ConnectionRequest { User { _s_me }, Address { _s_receiver.get_socket_address() } }
@@ -41,8 +41,9 @@ void AppBackend::Frontend_Event::handle_event()
 
   case Frontend_Event::ACCEPT_CONNECTION_REQUEST:
   {
-    auto itr = std::ranges::find(_s_incoming_connection_requests, _s_current_id, _Projection);
-    assert(itr != _s_incoming_connection_requests.end());
+    std::cout << "Frontend_Event::ACCEPT_CONNECTION_REQUEST BEGIN" << std::endl;
+    auto itr = std::ranges::find(_s_incoming_requests, _s_current_id, _Projection);
+    assert(itr != _s_incoming_requests.end());
     
     Address receiver_addr { itr->get_address() };
 
@@ -55,6 +56,7 @@ void AppBackend::Frontend_Event::handle_event()
     _s_sender.send(receiver_addr, m);
     _s_connections.emplace_back(*itr);
     delete m;
+    std::cout << "Frontend_Event::ACCEPT_CONNECTION_REQUEST END" << std::endl;
     break;
   }
 

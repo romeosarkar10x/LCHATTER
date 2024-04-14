@@ -2,6 +2,7 @@
 #define LINEAR_POINTER_HPP
 
 #include <type_traits>
+#include "../../Inc/Common/Fwd.hpp"
 
 template<class T>
   struct underlying_pointer_type : std::type_identity<void> { };
@@ -11,7 +12,7 @@ template<class T>
   { using type = T; };
 
 template<class T>
-  using underlying_pointer_type_t = underlying_pointer_type<T>::type;
+  using underlying_pointer_type_t = typename underlying_pointer_type<T>::type;
 
 template<class T>
   using is_linear_pointer = std::conjunction<
@@ -22,22 +23,40 @@ template<class T>
 template<class T>
   static constexpr bool is_linear_pointer_v = is_linear_pointer<T>::value;
 
+// template<class T>
+//   struct __contains_method_serialize
+//   {
+
+//   private:
+//     template<
+//       class U,
+//       class V = decltype(std::declval<const U>().serialize(std::declval<char*>(), std::declval<u_int&>())),
+//       class = std::enable_if_t<std::is_same_v<void, V>>
+//     >
+//       static std::true_type test(U object);
+
+//     static std::false_type test(...);
+  
+//   public:
+//     using type = decltype(test(std::declval<T>()));
+//   };
+
 template<class T>
   struct __contains_method_serialize
   {
 
   private:
-    template<
-      class U,
-      class V = decltype(std::declval<const U>().serialize(std::declval<char*>(), std::declval<unsigned int&>())),
-      class = std::enable_if_t<std::is_same_v<void, V>>
-    >
-      static std::true_type test(U object);
+    template<class U, U>
+    struct mock;
 
-    static std::false_type test(...);
+    template<class U>
+      static std::true_type test(mock<void (U::*)(char*, u_int&) const, &U::serialize>*);
+
+    template<class U>
+      static std::false_type test(...);
   
   public:
-    using type = decltype(test(std::declval<T>()));
+    using type = decltype(test<T>(0));
   };
 
 template<class T>
@@ -51,17 +70,17 @@ template<class T>
   {
 
   private:
-    template<
-      class U,
-      class V = decltype(std::declval<const U>().serialization_length()),
-      class = std::enable_if_t<std::is_same_v<unsigned int, V>>
-    >
-      static std::true_type test(U object);
+    template<class U, U>
+      struct mock;
+    
+    template<class U>
+      static std::true_type test(mock<u_int (U::*)() const, &U::serialization_length>*);
+    
+    template<class U>
+      static std::false_type test(...);
 
-    static std::false_type test(...);
-  
   public:
-    using type = decltype(test(std::declval<T>()));
+    using type = decltype(test<T>(0));
   };
 
 template<class T>
@@ -70,26 +89,110 @@ template<class T>
 template<class T>
   static constexpr bool contains_method_serialization_length_v = contains_method_serialization_length<T>::value;
 
+// template<class T>
+//   struct __contains_method_deserialize
+//   {
+
+//   private:
+//     template<
+//       class U,
+//       class V = decltype(std::declval<U&>().deserialize(std::declval<const char*>(), std::declval<u_int&>())),
+//       class = std::enable_if_t<std::is_same_v<void, V>>
+//     >
+//       static std::true_type test(U object);
+
+//     static std::false_type test(...);
+  
+//   public:
+//     using type = decltype(test(std::declval<T>()));
+//   };
+
+template<class T>
+  struct __contains_method_deserialize
+  {
+
+  private:
+    template<class U, U>
+      struct mock;
+
+    template<class U>
+      static std::true_type test(mock<void (U::*)(const char*, u_int&), U::deserialize>*);
+    
+    template<class U>
+      static std::false_type test(...);
+  
+  public:
+    using type = decltype(test<T>(0));
+  };
+
+template<class T>
+  struct contains_method_deserialize : __contains_method_deserialize<T>::type {};
+
+template<class T>
+  static constexpr bool contains_method_deserialize_v = contains_method_deserialize<T>::value;
+
+// template<class T>
+//   struct __contains_method_deserialization_length
+//   {
+
+//   private:
+//     template<
+//       class U,
+//       class V = decltype(std::declval<const U&>().deserialization_length(std::declval<const char*>())),
+//       class = std::enable_if_t<std::is_same_v<u_int, V>>
+//     >
+//       static std::true_type test(U object);
+
+//     static std::false_type test(...);
+  
+//   public:
+//     using type = decltype(test(std::declval<T>()));
+//   };
+
+template<class T>
+  struct __contains_method_deserialization_length
+  {
+
+  private:
+    template<class U, U>
+      struct mock;
+    
+    template<class U>
+      static std::true_type test(mock<u_int (U::*)(const char*, u_int&) const, U::deserialization_length>*);
+    
+    template<class U>
+      static std::false_type test(...);
+  
+  public:
+    using type = decltype(test(std::declval<T>()));
+  };
+
+template<class T>
+  struct contains_method_deserialization_length : __contains_method_deserialization_length<T>::type {};
+
+template<class T>
+  static constexpr bool contains_method_deserialization_length_v = contains_method_deserialization_length<T>::value;
+
 template<class T>
   struct underlying_array_type : std::type_identity<void> {};
 
 template<class T>
   struct underlying_array_type<T[]> { using type = T; };
 
-template<class T, unsigned int N>
+template<class T, u_int N>
   struct underlying_array_type<T[N]> { using type = T; };
 
 template<class T>
-  using underlying_array_type_t = underlying_array_type<T>::type;
+  using underlying_array_type_t = typename underlying_array_type<T>::type;
 
 template<class T>
-  struct underlying_array_size : std::integral_constant<unsigned int, 0U> {};
+  struct underlying_array_size : std::integral_constant<u_int, 0U> {};
 
-template<class T, unsigned int N>
-  struct underlying_array_size<T[N]> : std::integral_constant<unsigned int, N> {};
+template<class T, u_int N>
+  struct underlying_array_size<T[N]> : std::integral_constant<u_int, N> {};
 
 template<class T>
-  static constexpr unsigned int underlying_array_size_v = underlying_array_size<T>::value;
+  static constexpr u_int underlying_array_size_v = underlying_array_size<T>::value;
 
 template<class T>
   using is_linear_array = std::conjunction<

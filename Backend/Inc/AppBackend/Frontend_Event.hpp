@@ -24,7 +24,7 @@ class AppBackend::Frontend_Event
       ACCEPT_CONNECTION_REQUEST,
       REJECT_CONNECTION_REQUEST,
 
-      /// GROUP
+      // GROUP
       SEND_GROUP_CHAT_MESSAGE,
         
         SEND_GROUP_CONNECTION_REQUEST,

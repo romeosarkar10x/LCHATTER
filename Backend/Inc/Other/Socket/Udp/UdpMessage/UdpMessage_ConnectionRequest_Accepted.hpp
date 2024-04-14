@@ -7,12 +7,16 @@ class UdpMessage_ConnectionRequest_Accepted : public UdpMessage_ConnectionReques
 {
 
 public:
+  UdpMessage_ConnectionRequest_Accepted() = default;
+
   UdpMessage_ConnectionRequest_Accepted(const UdpMessage_ConnectionRequest& r);
   
-  UdpMessage_ConnectionRequest_Accepted();
+  u_int   serialization_length() const;
+  void    serialize(char* buffer, u_int& offset) const;
 
-  // UdpMessage_ConnectAccept(const User& user, const Address& addr) :
-  // UdpMessage_Connect { UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED , user, addr } {}
+  void deserialize(const char* buffer, u_int& offset) override;
+
+  void handle() override;
 };
 
 #endif

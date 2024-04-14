@@ -1,6 +1,7 @@
 #include "../../Inc/AppBackend/AppBackend.hpp"
 #include "../../Inc/AppBackend/Frontend_Event.hpp"
 #include "../../Inc/File/Saver.hpp"
+#include "../../Inc/File/Loader.hpp"
 
 AppBackend::State::Enum_State AppBackend::State::get_state() { return _s_state; }
 void       AppBackend::State::set_state(Enum_State state) { _s_state = state; }
@@ -48,23 +49,23 @@ void AppBackend::handle_receive()
   {
     UdpMessage_ConnectionRequest* ptr_r = static_cast<UdpMessage_ConnectionRequest*>(m);
     auto& user = ptr_r->get_user();
-    auto itr = std::ranges::find(_s_incoming_connection_requests, user, [] (const ConnectionRequest& r) { return r.get_user(); });
+    auto itr = std::ranges::find(_s_incoming_requests, user, [] (const ConnectionRequest& r) { return r.get_user(); });
 
-    if(itr != _s_incoming_connection_requests.end())
+    if(itr != _s_incoming_requests.end())
     {
       itr->get_timepoint().set_time(ptr_r->get_timepoint());
       break;
     }
 
-    _s_incoming_connection_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
-    _s_incoming_connection_requests.back().get_address().set_ip_address(sender_addr);
+    _s_incoming_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
+    _s_incoming_requests.back().get_address().set_ip_address(sender_addr);
     break;
   }
   
   case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
   {
     const String& id = static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_user().get_id();
-    auto itr = std::ranges::find(_s_outgoing_connection_requests, id, _Projection);
+    auto itr = std::ranges::find(_s_outgoing_requests, id, _Projection);
 
     itr->set_state(ConnectionRequest::State::ACCEPTED);
     itr->get_address().set_ip_address(sender_addr);
@@ -142,10 +143,23 @@ void AppBackend::save()
 
   saver.write(_s_me);
   saver.write(_s_connections);
-  saver.write(_s_incoming_connection_requests);
-  saver.write(_s_outgoing_connection_requests);
+  saver.write(_s_incoming_requests);
+  saver.write(_s_outgoing_requests);
 
   saver.save();
+}
+
+void AppBackend::load()
+{
+  loader.load();
+
+  loader.read(State::_s_state);
+
+  loader.read(_s_me);
+  loader.read(_s_connections);
+  loader.read(_s_incoming_requests);
+  loader.read(_s_outgoing_requests);
+
 }
 
 
@@ -167,5 +181,5 @@ UdpReceiver   AppBackend::_s_receiver {};
 
 std::vector<Connection> AppBackend::_s_connections {};
 
-std::vector<ConnectionRequest> AppBackend::_s_incoming_connection_requests;
-std::vector<ConnectionRequest> AppBackend::_s_outgoing_connection_requests;
+std::vector<ConnectionRequest> AppBackend::_s_incoming_requests;
+std::vector<ConnectionRequest> AppBackend::_s_outgoing_requests;

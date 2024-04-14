@@ -7,7 +7,7 @@ Logger& Logger::operator<<(Manipulator m)
   switch(m)
   {
   case timestamp:
-    _m_file << TimePoint {};
+    _m_file << TimePoint { 0 };
     break;
   case endl:
     _m_file << std::endl;

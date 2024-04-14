@@ -546,7 +546,7 @@ public:
     // Initialize the underlying app
     AppBackend::init();
     StartUp();
-    int cnt = 0;
+    // int cnt = 0;
     while (!glfwWindowShouldClose(window))
     {
       // printf("%d ", cnt++);

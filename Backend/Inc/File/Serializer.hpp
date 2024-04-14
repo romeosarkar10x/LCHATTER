@@ -2,8 +2,6 @@
 #define SERIALIZER_HPP
 
 #include <windows.h>
-#include <iostream>
-#include <type_traits>
 #include <vector>
 
 #include "Trait.hpp"
@@ -71,14 +69,14 @@ class Serializer
 
   template<class T>
     static std::enable_if_t<std::is_arithmetic_v<T>, void>
-      serialize(const T object, char* const buffer, unsigned int& offset)
+      serialize(const T object, char* const buffer, u_int& offset)
     {
       *reinterpret_cast<T*>(buffer + offset) = object;
       offset += serialization_length(object);
     }
 
   template<class T>
-    static std::enable_if_t<std::is_arithmetic_v<T>, unsigned int>
+    static std::enable_if_t<std::is_arithmetic_v<T>, u_int>
       serialization_length(T)
     { return sizeof(T); }
 
@@ -86,11 +84,11 @@ class Serializer
 
   template<class T>
     static std::enable_if_t<std::is_enum_v<T>, void>
-      serialize(const T object, char* const buffer, unsigned int& offset)
+      serialize(const T object, char* const buffer, u_int& offset)
     { serialize(static_cast<std::underlying_type_t<T>>(object), buffer, offset); }
 
   template<class T>
-    static constexpr std::enable_if_t<std::is_enum_v<T>, unsigned int>
+    static constexpr std::enable_if_t<std::is_enum_v<T>, u_int>
       serialization_length(const T object)
     { return serialization_length(static_cast<std::underlying_type_t<T>>(object)); }
 
@@ -98,32 +96,41 @@ class Serializer
 
   template<class T>
     static std::enable_if_t<is_serializable_by_def_v<T>, void>
-      serialize(const T& object, char* const buffer, unsigned int& offset)
-    { return object.serialize(buffer, offset); }
+      serialize(const T& object, char* const buffer, u_int& offset)
+    { object.serialize(buffer, offset); }
+  
+  template<class T>
+    static std::enable_if_t<is_serializable_by_def_v<T>, void>
+      serialize_nv(const T& object, char* const buffer, u_int& offset)
+    { object.T::serialize(buffer, offset); }
 
   template<class T>
-    static constexpr std::enable_if_t<is_serializable_by_def_v<T>, unsigned int> serialization_length(const T& object)
+    static constexpr std::enable_if_t<is_serializable_by_def_v<T>, u_int> serialization_length(const T& object)
     { return object.serialization_length(); }
+
+  template<class T>
+    static constexpr std::enable_if_t<is_serializable_by_def_v<T>, u_int> serialization_length_nv(const T& object)
+    { return object.T::serialization_length(); }
 
   /// Overloads for is_linear_pointer_to_serializable_v<T>
 
   template<class T>
     static std::enable_if_t<is_linear_pointer_to_serializable_v<T>, void>
-      serialize(const T ptr_object, unsigned int n, char* const buffer, unsigned int& offset)
+      serialize(const T ptr_object, u_int n, char* const buffer, u_int& offset)
     {
-      for(unsigned int index = 0; index < n; index++)
+      for(u_int index = 0U; index < n; index++)
       {
         serialize(ptr_object[index], buffer, offset);
       }
     }
 
   template<class T>
-    static constexpr std::enable_if_t<is_linear_pointer_to_serializable_v<T>, unsigned int>
-      serialization_length(const T ptr_object, unsigned int n)
+    static constexpr std::enable_if_t<is_linear_pointer_to_serializable_v<T>, u_int>
+      serialization_length(const T ptr_object, u_int n)
     {
-      unsigned int total_length = 0;
+      u_int total_length = 0U;
 
-      for(unsigned int index = 0; index < n; index++)
+      for(u_int index = 0U; index < n; index++)
       {
         total_length += serialization_length(ptr_object[index]);
       }
@@ -135,21 +142,21 @@ class Serializer
 
   template<class T>
     static constexpr std::enable_if_t<is_bounded_linear_array_of_serializable_v<T>, void>
-      serialize(const T& array_objects, char* const buffer, unsigned int& offset)
+      serialize(const T& array_objects, char* const buffer, u_int& offset)
     {
-      for(unsigned int index = 0; index < underlying_array_size_v<T>; index++)
+      for(u_int index = 0U; index < underlying_array_size_v<T>; index++)
       {
         serialize(array_objects[index], buffer, offset);
       }
     }
   
   template<class T>
-    static constexpr std::enable_if_t<is_bounded_linear_array_of_serializable_v<T>, unsigned int>
+    static constexpr std::enable_if_t<is_bounded_linear_array_of_serializable_v<T>, u_int>
       serialization_length(const T& array_objects)
     {
-      unsigned int total_length = 0;
+      u_int total_length = 0U;
 
-      for(unsigned int index = 0; index < underlying_array_size_v<T>; index++)
+      for(u_int index = 0U; index < underlying_array_size_v<T>; index++)
       {
         total_length += serialization_length(array_objects[index]);
       }
@@ -161,18 +168,32 @@ class Serializer
 
   template<class T>
     static std::enable_if_t<is_primarily_serializable_v<T>, void>
-      serialize(const std::vector<T>& vector_objects, char* const buffer, unsigned int& offset)
+      serialize(const std::vector<T>& vector_objects, char* const buffer, u_int& offset)
     {
       serialize(vector_objects.size(), buffer, offset);
-
-      for(size_t index = 0; index < vector_objects.size(); index++)
+      
+      for(size_t index = 0U; index < vector_objects.size(); index++)
       {
         serialize(vector_objects[index], buffer, offset);
       }
     }
 
-  static void serialize(const FILETIME object, char* const buffer, unsigned int& offset);
-  static unsigned int serialization_length(const FILETIME object);
+  template<class T>
+    static std::enable_if_t<is_primarily_serializable_v<T>, u_int>
+      serialization_length(const std::vector<T>& vector_objects)
+    {
+      u_int total_length = 0U;
+
+      for(size_t index = 0U; index < vector_objects.size(); index++)
+      {
+        total_length += serialization_length(vector_objects[index]);
+      }
+
+      return total_length;
+    }
+
+  static void serialize(const FILETIME object, char* const buffer, u_int& offset);
+  static u_int serialization_length(const FILETIME object);
 
   Serializer() = delete;
   ~Serializer() = delete;

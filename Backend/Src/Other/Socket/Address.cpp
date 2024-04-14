@@ -2,6 +2,7 @@
 
 #include "../../../Inc/Other/Socket/Address.hpp"
 #include "../../../Inc/File/Serializer.hpp"
+#include "../../../Inc/File/Deserializer.hpp"
 
 Address::Address() { _m_addr.sin_family = AF_INET; }
 
@@ -38,26 +39,24 @@ void Address::set_ip_address(const Address& addr) { _m_addr.sin_addr = addr._m_a
 
 String Address::to_string() const { return "{" + get_ip_address() + ":" + get_port() + "}"; }
 
-unsigned int Address::serialization_length() const
+u_int Address::serialization_length() const
 {
   return Serializer::serialization_length(_m_addr.sin_port)+ 
     Serializer::serialization_length(_m_addr.sin_addr.s_addr); 
 }
 
-void Address::serialize(char* buffer, unsigned int& offset) const
+void Address::serialize(char* buffer, u_int& offset) const
 {
   Serializer::serialize(_m_addr.sin_port, buffer, offset);
   Serializer::serialize(_m_addr.sin_addr.s_addr, buffer, offset); 
 }
 
-int Address::deserialize(const char* buffer)
+void Address::deserialize(const char* const buffer, u_int& offset)
 {
-  std::memcpy(&_m_addr.sin_port, buffer, sizeof(_m_addr.sin_port));
-  std::memcpy(&(_m_addr.sin_addr), buffer + sizeof(_m_addr.sin_port), sizeof(_m_addr.sin_addr));
+  this->~Address();
 
-  return serialization_length();
+  Deserializer::deserialize(_m_addr.sin_port, buffer, offset);
+  Deserializer::deserialize(_m_addr.sin_addr.s_addr, buffer, offset);
 }
-
-int Address::deserialize(const char* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 
 std::ostream& operator<<(std::ostream& o, const Address& a) { o << a.to_string(); return o; }

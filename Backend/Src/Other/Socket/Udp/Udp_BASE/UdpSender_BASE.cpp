@@ -28,7 +28,7 @@ void UdpSender_BASE::send(const Address& receiver_addr)
 
   _s_UdpSender_BASE_Logger << Logger::timestamp << "[#" << _m_id << "] SEND " << receiver_addr << " @ OFFSET: " << _m_offset << Logger::endl;
   
-  for(unsigned int s = 0; s < _m_offset; s++)
+  for(u_int s = 0; s < _m_offset; s++)
   {
     auto f = _s_UdpSender_BASE_Logger->flags();
     _s_UdpSender_BASE_Logger << std::hex
@@ -43,7 +43,7 @@ void UdpSender_BASE::send(const Address& receiver_addr)
   
   _s_UdpSender_BASE_Logger << Logger::endl;
 
-  int ret = sendto(_m_socket, reinterpret_cast<char*>(_m_buffer), _m_offset, 0, reinterpret_cast<const SOCKADDR*>(&receiver_addr._m_addr), sizeof(receiver_addr._m_addr));
+  int ret = sendto(_m_socket, reinterpret_cast<char*>(_m_buffer), static_cast<int>(_m_offset), 0, reinterpret_cast<const SOCKADDR*>(&receiver_addr._m_addr), sizeof(receiver_addr._m_addr));
   
   if(ret == SOCKET_ERROR)
   {

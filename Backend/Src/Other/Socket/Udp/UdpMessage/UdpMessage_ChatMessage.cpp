@@ -1,31 +1,38 @@
+#include "../../../../../Inc/AppBackend/AppBackend.hpp"
 #include "../../../../../Inc/Other/Socket/Udp/UdpMessage/UdpMessage_ChatMessage.hpp"
 #include "../../../../../Inc/File/Serializer.hpp"
+#include "../../../../../Inc/File/Deserializer.hpp"
 
 UdpMessage_ChatMessage::UdpMessage_ChatMessage(const ChatMessage& m) :
-  UdpMessage { UdpMessage::Type::CHAT_MESSAGE },
   ChatMessage { m } {}
 
-unsigned int UdpMessage_ChatMessage::serialization_length() const
+UdpMessage::Type UdpMessage_ChatMessage::get_type() const
 {
-  return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) +
-    Serializer::serialization_length(static_cast<const ChatMessage&>(*this));
+  return UdpMessage::Type::CHAT_MESSAGE;
 }
 
-void UdpMessage_ChatMessage::serialize(char* buffer, unsigned int& offset) const
+u_int UdpMessage_ChatMessage::serialization_length() const
 {
-  Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
+  return Serializer::serialization_length(static_cast<const ChatMessage&>(*this));
+}
+
+void UdpMessage_ChatMessage::serialize(char* buffer, u_int& offset) const
+{
   Serializer::serialize(static_cast<const ChatMessage&>(*this), buffer, offset);
 }
 
-int UdpMessage_ChatMessage::deserialize(const char* buffer)
+void UdpMessage_ChatMessage::deserialize(const char* const buffer, u_int& offset)
 {
-  int offset = 0;
-
-  offset += UdpMessage::deserialize(buffer, offset);
-  offset += ChatMessage::deserialize(buffer, offset);
-
-  return offset;
+  Deserializer::deserialize(static_cast<ChatMessage&>(*this), buffer, offset);
 }
 
-int UdpMessage_ChatMessage::deserialize(const char* buffer, int offset)
-  { return deserialize(buffer + offset); }
+void UdpMessage_ChatMessage::handle()
+{
+  auto connections = AppBackend::get_connections();
+
+  auto itr = std::ranges::find(connections, _m_sender,
+    [] (const Connection& c) -> const User& { return c.get_user(); }
+  );
+
+  itr->get_chat().emplace(static_cast<ChatMessage&&>(*this));
+}

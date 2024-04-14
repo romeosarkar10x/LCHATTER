@@ -7,11 +7,6 @@
 
 class ChatMessage
 {
-  User      _m_sender;
-  String    _m_text;
-  TimePoint _m_timepoint {};
-
-  bool      _m_is_me { false };
 
 public:
   ChatMessage() = default;
@@ -30,13 +25,18 @@ public:
 
   bool operator<(ChatMessage& rhs);
   
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset)   const;
+  u_int serialization_length() const;
+  void serialize(char* buffer, u_int& offset) const;
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  void deserialize(const char* buffer, u_int& offset);
+  
+protected:
+  User      _m_sender;
+  String    _m_text;
+  TimePoint _m_timepoint { 0 };
 
-private:
+  bool      _m_is_me { false };
+
   friend std::ostream& operator<<(std::ostream& o, const ChatMessage& chat_message);
 };
 

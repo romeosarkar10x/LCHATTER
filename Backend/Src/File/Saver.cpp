@@ -1,3 +1,4 @@
+#include <iostream>
 #include "../../Inc/File/Saver.hpp"
 
 Saver::Saver(const char* f_name)
@@ -32,8 +33,10 @@ void Saver::reset()
 
 void Saver::save()
 {
+  std::cout << "save()" << std::endl;
   assert(_m_out.is_open());
   _m_out.write(_m_buffer, _m_offset);
+  std::cout << "save dome!" << std::endl;
 }
 
 

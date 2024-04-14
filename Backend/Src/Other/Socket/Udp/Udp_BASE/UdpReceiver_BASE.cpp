@@ -43,17 +43,17 @@ bool UdpReceiver_BASE::receive()
   }
 
   reinterpret_cast<char*>(_m_buffer)[ret] = '\0';
-  _m_offset = static_cast<unsigned int>(ret);
+  _m_offset = static_cast<u_int>(ret);
 
   _s_UdpReceiver_BASE_Logger << Logger::timestamp << "[#" << _m_id << "].RECEIVE " << _m_sender_addr << " @ "
     << ", _m_offset: " << _m_offset << Logger::endl;
 
-  for(int i = 0; i < _m_offset; i++)
+  for(u_int index = 0; index < _m_offset; index++)
   {
     _s_UdpReceiver_BASE_Logger << std::hex
-      << static_cast<u_int>(*(reinterpret_cast<u_char*>(_m_buffer) + i));
+      << static_cast<u_int>(*(reinterpret_cast<u_char*>(_m_buffer) + index));
     
-    char c = *(reinterpret_cast<char*>(_m_buffer) + i);
+    char c = *(reinterpret_cast<char*>(_m_buffer) + index);
     if(31 < c && c < 127) { _s_UdpReceiver_BASE_Logger << "[" << c << "]"; }
     
     _s_UdpReceiver_BASE_Logger << " ";

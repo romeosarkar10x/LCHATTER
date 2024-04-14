@@ -15,7 +15,7 @@ class MD5_Digest
   mutable String  _m_string;
   mutable bool    _m_is_valid { false };
 
-  friend MD5_Hash;
+  friend class MD5_Hash;
 
 public:
   MD5_Digest() = default;
@@ -23,6 +23,8 @@ public:
 
   MD5_Digest(const MD5_Digest& rhs) = default;
   MD5_Digest(MD5_Digest&& rhs);
+
+  ~MD5_Digest();
   
   void swap(MD5_Digest& rhs) noexcept;
 
@@ -33,11 +35,10 @@ public:
 
   bool operator==(const MD5_Digest& rhs) const;
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  u_int serialization_length() const;
+  void serialize(char* buffer, u_int& offset) const;
   
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  void deserialize(const char* buffer, u_int& offset);
 
 private:
   friend std::ostream& operator<<(std::ostream& o, const MD5_Digest& digest);

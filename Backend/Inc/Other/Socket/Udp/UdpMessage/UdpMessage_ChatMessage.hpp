@@ -12,13 +12,16 @@ public:
   UdpMessage_ChatMessage() = default;
 
   UdpMessage_ChatMessage(const ChatMessage& m);
-  ~UdpMessage_ChatMessage() = default;
+  // ~UdpMessage_ChatMessage() override = default;
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  u_int serialization_length() const override;
+  void serialize(char* buffer, u_int& offset) const override;
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  UdpMessage::Type get_type() const override;
+  
+  void deserialize(const char* buffer, u_int& offset) override;
+
+  void handle() override;
 };
 
 #endif

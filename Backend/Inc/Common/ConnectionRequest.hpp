@@ -9,31 +9,32 @@ class ConnectionRequest
 {
 
 public:
-  class State
+  enum class State
   {
-  
-  public:
-    enum Enum_State
-    {
-      AWAITING_RESPONSE,
-      ACCEPTED,
-      REJECTED,
-    };
-
-    Enum_State  get_state() const;
-    void        set_state(const Enum_State state);
-    
-  private:
-    Enum_State _m_state { AWAITING_RESPONSE };
+    AWAITING_RESPONSE,
+    ACCEPTED,
+    REJECTED,
   };
+  // class State
+  // {
+  
+  // public:
+    
+  //   State() = default;
+  //   ~State() = default;
+
+  //   Enum_State  get_state() const;
+  //   void        set_state(const Enum_State state);
+
+    
+    
+  // private:
+  //   Enum_State _m_state { AWAITING_RESPONSE };
+  // };
 
   ConnectionRequest() = default;
 
   ConnectionRequest(const User& user, const Address& addr);
-
-  // ConnectionRequest(const ConnectionRequest& rhs) = default;
-  // ConnectionRequest(ConnectionRequest&& rhs) = default;
-
 
   const User&       get_user()        const;
 
@@ -43,22 +44,21 @@ public:
   const TimePoint&  get_timepoint()   const;
   TimePoint&        get_timepoint();
 
-  State::Enum_State get_state()       const;
-  void              set_state(State::Enum_State state);
+  State   get_state()       const;
+  void    set_state(State state);
 
   bool operator<(const ConnectionRequest& rhs);
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  u_int   serialization_length() const;
+  void    serialize(char* buffer, u_int& offset) const;
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  void deserialize(const char* buffer, u_int& offset);
 
-private:
+protected:
   User      _m_user       {};
   Address   _m_addr       {};
-  State     _m_state      {};
-  TimePoint _m_timepoint  {};
+  State     _m_state      { State::AWAITING_RESPONSE };
+  TimePoint _m_timepoint  { 0 };
 
   friend std::ostream& operator<<(std::ostream& o, const ConnectionRequest& r);
 };

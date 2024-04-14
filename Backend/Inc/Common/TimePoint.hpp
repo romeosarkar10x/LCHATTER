@@ -24,8 +24,9 @@ class TimePoint
   friend std::ostream& operator<<(std::ostream& o, const TimePoint& timepoint);
 
 public:
-  TimePoint(int);
   TimePoint();
+  TimePoint(int);
+  // TimePoint() = delete;
 
   TimePoint(const TimePoint& rhs);
 
@@ -46,11 +47,10 @@ public:
   
   void refresh();
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  u_int serialization_length() const;
+  void serialize(char* buffer, u_int& offset) const;
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  void deserialize(const char* buffer, u_int& offset);
 
   bool operator<(const TimePoint& rhs) const;
 

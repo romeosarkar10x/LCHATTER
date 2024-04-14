@@ -3,57 +3,42 @@
 
 #include "../../Address.hpp"
 
+/* Abstract */
 class UdpMessage
 {
 public:
 
-  class Type
+  enum class Type : char
   {
+    INVALID = -1,
+    NONE = 0,
+    PING,
 
-  public:
-    enum Enum_Type : char
-    {
-      INVALID = -1,
-      NONE = 0,
-      PING,
-      CHAT_MESSAGE,
-      CONNECTION_REQUEST,
-      CONNECTION_REQUEST_ACCEPTED,
-      CONNECTION_REQUEST_REJECTED
-    };
+    CHAT_MESSAGE,
 
-    Type() = default;
+    CONNECTION_REQUEST,
+    CONNECTION_REQUEST_ACCEPTED,
+    CONNECTION_REQUEST_REJECTED,
 
-    Type(Enum_Type type);
+    // GROUP
+    GROUP_CHAT_MESSAGE,
     
-    unsigned int serialization_length() const;
-    void serialize(char* buffer, unsigned int& offset) const;
-
-    int deserialize(const char* buffer);
-    int deserialize(const char* buffer, int offset);
-
-    operator Type::Enum_Type() const;
-
-  private:
-    friend class UdpMessage;
-    
-    Enum_Type   _m_t;
+    GROUP_CONNECTION_REQUEST,
+    ACCEPT_GROUP_CONNECTION_REQUEST,
+    REJECT_GROUP_CONNECTION_REQUEST
   };
   
   UdpMessage() = default;
+  virtual ~UdpMessage() = default;
 
-  UdpMessage(Type m_type);
+  virtual Type get_type() const = 0;
 
-  Type get_type() const;
+  virtual u_int   serialization_length() const = 0;
+  virtual void    serialize(char* buffer, u_int& offset) const = 0;
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  virtual void deserialize(const char* buffer, u_int& offset) = 0;
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
-
-private:
-  Type _m_type { Type::NONE };
+  virtual void handle() = 0;
 
   friend std::ostream& operator<<(std::ostream& o, const Type t);
 };

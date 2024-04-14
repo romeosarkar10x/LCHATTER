@@ -6,16 +6,17 @@ template<class T>
   {
 
   private:
-    template<
-      class U,
-      class V = decltype(std::declval<const U>().serialize(std::declval<char*>(), std::declval<int&>())),
-      class = std::enable_if_t<std::is_same_v<int, V>>>
-      static std::true_type test(U object);
+    template<class U, U>
+    struct dummy {};
 
-    static std::false_type test(...);
+    template<class U>
+      static std::true_type test(dummy<void (U::*)(char*, u_int&) const, &U::serialize>*);
+
+    template<class U>
+      static std::false_type test(...);
   
   public:
-    using type = decltype(test(std::declval<T>()));
+    using type = decltype(test<T>(0));
   };
 
 template<class T>
@@ -25,8 +26,8 @@ template<class T>
   static constexpr bool contains_serialize_v = contains_serialize<T>::value;
 
 struct foo {};
-struct foo_with_incorrect_serialize { void serialize(const char*, int&) const; };
-struct foo_with_serialize { unsigned int serialize(const char* const, int&) const; };
+struct foo_with_incorrect_serialize { void serialize(char*, u_int&) const; };
+struct foo_with_serialize { u_int serialize(char* const, u_int&) const; };
 
 int main()
 {

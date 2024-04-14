@@ -10,7 +10,7 @@ class UdpMessage_Ping : public UdpMessage
   Address _m_sender;
 public:
 
-  UdpMessage_Ping();
+  // UdpMessage_Ping() = default;
 };
 
 #endif

@@ -21,6 +21,7 @@ void Udp_BASE::_m_init()
     the blocking mode for the socket based on the numerical value of iMode.
     If i_mode = 0, blocking is enabled; 
     If i_mode != 0, non-blocking mode is enabled. */
+  
   u_long i_mode = 1;
   ioctlsocket(_m_socket, FIONBIO, &i_mode);
 
@@ -55,9 +56,9 @@ const Address&  Udp_BASE::get_socket_address() const { assert(_m_is_initialized)
 char*         Udp_BASE::get_buffer() { assert(_m_is_initialized); return _m_buffer; }
 int    Udp_BASE::get_buffer_size() { return _S_buffer_size; }
 
-unsigned int Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
+u_int Udp_BASE::get_offset() { assert(_m_is_initialized); return _m_offset; }
 void Udp_BASE::reset_offset() { assert(_m_is_initialized); _m_offset = 0; }
-void Udp_BASE::increment_offset(int amount) { assert(_m_is_initialized); _m_offset += amount; }
+void Udp_BASE::increment_offset(u_int amount) { assert(_m_is_initialized); _m_offset += amount; }
 
 
 Udp_BASE::~Udp_BASE()

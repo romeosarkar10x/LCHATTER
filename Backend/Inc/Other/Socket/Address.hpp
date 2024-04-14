@@ -35,11 +35,12 @@ public:
 
   String to_string() const;
 
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  u_int serialization_length() const;
+  void serialize(char* buffer, u_int& offset) const;
   
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  void deserialize(const char* buffer, u_int& offset);
+  // int deserialize(const char* buffer);
+  // int deserialize(const char* buffer, int offset);
 };
 
 #endif

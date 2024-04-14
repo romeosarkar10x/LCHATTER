@@ -1,51 +1,46 @@
+#include <algorithm>
+
+#include "../../../../../Inc/AppBackend/AppBackend.hpp"
 #include "../../../../../Inc/Other/Socket/Udp/UdpMessage/UdpMessage_ConnectionRequest.hpp"
 #include "../../../../../Inc/File/Serializer.hpp"
-
-UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest() :
-UdpMessage { UdpMessage::Type::CONNECTION_REQUEST } {}
+#include "../../../../../Inc/File/Deserializer.hpp"
 
 UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest(const ConnectionRequest& r) :
-UdpMessage { UdpMessage::Type::CONNECTION_REQUEST},
-ConnectionRequest { r } {}
+  ConnectionRequest { r } {}
 
 UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest(const User& user, const Address& addr) :
-UdpMessage { UdpMessage::Type::CONNECTION_REQUEST },
-ConnectionRequest { user, addr } {}
+  ConnectionRequest { user, addr } {}
 
-UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest(UdpMessage::Type t) :
-UdpMessage { t } {}
-
-UdpMessage_ConnectionRequest::UdpMessage_ConnectionRequest(UdpMessage::Type t, const ConnectionRequest& r) :
-UdpMessage { t },
-ConnectionRequest { r } {}
-// UdpMessage_ConnectionRequest(UdpMessage::Type message_type) :
-// UdpMessage { message_type } {}
-
-// UdpMessage_ConnectionRequest(UdpMessage::Type message_type, const User& user, const Address& addr) :
-// UdpMessage { message_type },
-// _m_user { user },
-// _m_addr { addr } {}
-
-unsigned int UdpMessage_ConnectionRequest::serialization_length() const
+u_int UdpMessage_ConnectionRequest::serialization_length() const
 {
-  return Serializer::serialization_length(static_cast<const UdpMessage&>(*this)) + 
-    Serializer::serialization_length(static_cast<const ConnectionRequest&>(*this));
+  return Serializer::serialization_length(static_cast<const ConnectionRequest&>(*this));
 }
 
-void UdpMessage_ConnectionRequest::serialize(char* buffer, unsigned int& offset) const
+void UdpMessage_ConnectionRequest::serialize(char* buffer, u_int& offset) const
 {
-  Serializer::serialize(static_cast<const UdpMessage&>(*this), buffer, offset);
   Serializer::serialize(static_cast<const ConnectionRequest&>(*this), buffer, offset);
 }
 
-int UdpMessage_ConnectionRequest::deserialize(const char* buffer)
+void UdpMessage_ConnectionRequest::deserialize(const char* buffer, u_int& offset)
 {
-  int offset = 0;
+  // this->~UdpMessage_ConnectionRequest();
   
-  offset += UdpMessage::deserialize(buffer, offset);
-  offset += ConnectionRequest::deserialize(buffer, offset);
-
-  return offset;
+  Deserializer::deserialize(static_cast<ConnectionRequest&>(*this), buffer, offset);
 }
 
-int UdpMessage_ConnectionRequest::deserialize(const char* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
+void UdpMessage_ConnectionRequest::handle()
+{
+  auto& incoming_requests = AppBackend::get_incoming_requests();
+  auto itr = std::ranges::find(incoming_requests, _m_user,
+    [] (const ConnectionRequest& r) { return r.get_user(); }
+  );
+
+  if(itr != incoming_requests.end())
+  {
+    itr->get_timepoint() = _m_timepoint;
+    return;
+  }
+
+  _m_addr.set_ip_address(AppBackend::get_receiver().get_sender_address());
+  incoming_requests.push_back(std::move(*this));
+}

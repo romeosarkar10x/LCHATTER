@@ -3,6 +3,7 @@
 
 #include <winsock2.h>
 
+#include "../../../../../Inc/Common/Fwd.hpp"
 #include "../../Address.hpp"
 
 /// OS Dependent
@@ -22,7 +23,7 @@ public:
   Address   _m_socket_address;
   
   char*         _m_buffer;
-  unsigned int  _m_offset;
+  u_int  _m_offset;
   
   void _m_init();
   void _m_destroy();
@@ -32,9 +33,9 @@ public:
   char*           get_buffer();
   static int      get_buffer_size();
   
-  unsigned int    get_offset();
+  u_int    get_offset();
   void            reset_offset();
-  void            increment_offset(int amount);
+  void            increment_offset(u_int amount);
 
 
   ~Udp_BASE();

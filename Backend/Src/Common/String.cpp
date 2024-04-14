@@ -4,6 +4,7 @@
 
 #include "../../Inc/Common/String.hpp"
 #include "../../Inc/File/Serializer.hpp"
+#include "../../Inc/File/Deserializer.hpp"
 
 void String::_m_destroy()
 {
@@ -29,9 +30,9 @@ const char* String::_m_get_buffer() const
 
 String::String() : _m_length { 0 } { reinterpret_cast<char*>(&_m_p)[0] = 0; }
 
-String::String(const char* const s) : String { s, static_cast<unsigned int>(std::strlen(s)) } {}
+String::String(const char* const s) : String { s, static_cast<u_int>(std::strlen(s)) } {}
 
-String::String(const char* const s, const unsigned int length) : _m_length { length }
+String::String(const char* const s, const u_int length) : _m_length { length }
 {
   if(length < _S_threshold_length)
   {
@@ -44,7 +45,7 @@ String::String(const char* const s, const unsigned int length) : _m_length { len
   }
 }
 
-String::String(const std::string& rhs) : String { rhs.c_str(), static_cast<unsigned int>(rhs.length()) } {}
+String::String(const std::string& rhs) : String { rhs.c_str(), static_cast<u_int>(rhs.length()) } {}
 
 String::String(const String& rhs) : _m_p { rhs._m_p }, _m_length { rhs._m_length }
 {
@@ -82,7 +83,7 @@ void String::swap(String& rhs) noexcept
 String String::operator+(const String& rhs) const
 {
   String s {};
-  unsigned int total_length = _m_length + rhs._m_length;
+  u_int total_length = _m_length + rhs._m_length;
 
   if(total_length < _S_threshold_length)
   {
@@ -105,8 +106,8 @@ String String::operator+(const String& rhs) const
 
 String String::operator+(const char* const rhs) const
 {
-  unsigned int rhs_length = static_cast<unsigned int>(std::strlen(rhs));
-  unsigned int total_length = _m_length + rhs_length;
+  u_int rhs_length = static_cast<u_int>(std::strlen(rhs));
+  u_int total_length = _m_length + rhs_length;
 
   String s {};
 
@@ -135,40 +136,41 @@ bool String::operator==(const String& rhs) const { return (strcmp(_m_get_buffer(
 bool String::operator!=(const String& rhs) const { return !operator==(rhs); }
 
 const char*   String::get_buffer() const noexcept { return _m_get_buffer(); }
-unsigned int  String::get_length() const noexcept { return _m_length; }
+u_int  String::get_length() const noexcept { return _m_length; }
 
 String::operator const char*() const noexcept { return _m_get_buffer(); }
 
-unsigned int String::serialization_length() const
+u_int String::serialization_length() const
 {
   return Serializer::serialization_length(_m_length) +
     Serializer::serialization_length(_m_get_buffer(), _m_length + 1);
 }
 
-void String::serialize(char* const buffer, unsigned int& offset) const
+void String::serialize(char* const buffer, u_int& offset) const
 {
   Serializer::serialize(_m_length, buffer, offset);
-  Serializer::serialize(_m_get_buffer(), _m_length + 1U, buffer, offset);
-  // std::memcpy(buffer + offset, _m_get_buffer(), _m_length + 1);
+  Serializer::serialize(_m_get_buffer(), _m_length, buffer, offset);
 }
 
-// int String::serialize(char* buffer, int offset) const { return serialize(buffer + offset); }
-
-int String::deserialize(const char* const buffer)
+void String::deserialize(const char* const buffer, u_int& offset)
 {
   this->~String();
-  new (this) String { buffer + sizeof(_m_length), *reinterpret_cast<const unsigned int*>(buffer) };
+
+  Deserializer::deserialize(_m_length, buffer, offset);
   
-  return sizeof(_m_length) + _m_length + 1U;
+  if(_m_length >= _S_threshold_length)
+  {
+    _m_p = new char[_m_length + 1U];
+  }
+
+  Deserializer::deserialize(_m_get_buffer(), _m_length, buffer, offset);
+  _m_get_buffer()[_m_length] = '\0';
 }
-
-int String::deserialize(const char* buffer, int offset) { return deserialize(buffer + offset); }
-
 
 String operator+(const char* lhs, const String& rhs)
 {
-  int lhs_length = static_cast<int>(std::strlen(lhs)), rhs_length = rhs.get_length();
-  int total_length = lhs_length + rhs_length;
+  u_int lhs_length = static_cast<u_int>(std::strlen(lhs)), rhs_length = rhs.get_length();
+  u_int total_length = lhs_length + rhs_length;
 
   String s {};
 

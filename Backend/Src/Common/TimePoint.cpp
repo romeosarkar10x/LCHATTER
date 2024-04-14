@@ -6,11 +6,13 @@
 
 #include "../../Inc/Common/TimePoint.hpp"
 #include "../../Inc/File/Serializer.hpp"
+#include "../../Inc/File/Deserializer.hpp"
 
 /// OS Dependent
 
-TimePoint::TimePoint(int)  {}
-TimePoint::TimePoint()     { GetSystemTimeAsFileTime(&_m_filetime); }
+// TimePoint::TimePoint() = delete;
+TimePoint::TimePoint() {};
+TimePoint::TimePoint(int) { GetSystemTimeAsFileTime(&_m_filetime); }
 
 TimePoint::TimePoint(const TimePoint& rhs) :
   _m_filetime { rhs._m_filetime },
@@ -32,8 +34,11 @@ TimePoint::TimePoint(TimePoint&& rhs) :
   _m_localtime { std::exchange(rhs._m_localtime, nullptr) },
   _m_localtime_is_valid { std::exchange(rhs._m_localtime_is_valid, false) } {}
 
-TimePoint& TimePoint::operator=(const TimePoint& rhs) { TimePoint copy = rhs; swap(copy); return *this; }
-TimePoint& TimePoint::operator=(TimePoint&& rhs) noexcept { swap(rhs); return *this; }
+TimePoint& TimePoint::operator=(const TimePoint& rhs)
+{ TimePoint copy = rhs; swap(copy); return *this; }
+
+TimePoint& TimePoint::operator=(TimePoint&& rhs) noexcept
+{ swap(rhs); return *this; }
 
 void TimePoint::swap(TimePoint& rhs) noexcept
 {
@@ -46,6 +51,8 @@ void TimePoint::swap(TimePoint& rhs) noexcept
 
 TimePoint::~TimePoint()
 {
+  _m_time_is_valid = false;
+
   if(_m_localtime != nullptr)
   {
     delete _m_localtime;
@@ -96,27 +103,22 @@ void TimePoint::refresh()
   _m_localtime_is_valid = false;
 }
 
-unsigned int TimePoint::serialization_length() const
+u_int TimePoint::serialization_length() const
 {
   return Serializer::serialization_length(_m_filetime);
 }
 
-void TimePoint::serialize(char* buffer, unsigned int& offset) const
+void TimePoint::serialize(char* buffer, u_int& offset) const
 {
   Serializer::serialize(_m_filetime, buffer, offset);
 }
 
-int TimePoint::deserialize(const char* buffer)
+void TimePoint::deserialize(const char* const buffer, u_int& offset)
 {
-  std::memcpy(&_m_filetime, buffer, sizeof(FILETIME));
+  // this->~TimePoint();
 
-  _m_time_is_valid = false;
-  _m_localtime_is_valid = false;
-
-  return sizeof(FILETIME);
+  Deserializer::deserialize(_m_filetime, buffer, offset);
 }
-
-int TimePoint::deserialize(const char* buffer, int offset) { return deserialize(reinterpret_cast<const char*>(buffer) + offset); }
 
 bool TimePoint::operator<(const TimePoint& rhs) const
 {

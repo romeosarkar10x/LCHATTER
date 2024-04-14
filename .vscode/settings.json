@@ -67,7 +67,8 @@
     "iomanip": "cpp",
     "sstream": "cpp",
     "map": "cpp",
-    "cassert": "cpp"
+    "cassert": "cpp",
+    "codecvt": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

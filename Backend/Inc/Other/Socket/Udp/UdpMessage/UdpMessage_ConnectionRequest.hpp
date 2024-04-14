@@ -10,18 +10,19 @@ class UdpMessage_ConnectionRequest : public UdpMessage, public ConnectionRequest
 {
 
 public:
+  UdpMessage_ConnectionRequest() = default;
 
-  UdpMessage_ConnectionRequest();
   UdpMessage_ConnectionRequest(const ConnectionRequest& r);
   UdpMessage_ConnectionRequest(const User& user, const Address& addr);
-  UdpMessage_ConnectionRequest(UdpMessage::Type t);
-  UdpMessage_ConnectionRequest(UdpMessage::Type t, const ConnectionRequest& r);
   
-  unsigned int serialization_length() const;
-  void serialize(char* buffer, unsigned int& offset) const;
+  UdpMessage::Type get_type() const override { return UdpMessage::Type::CONNECTION_REQUEST; }
 
-  int deserialize(const char* buffer);
-  int deserialize(const char* buffer, int offset);
+  u_int   serialization_length() const override;
+  void    serialize(char* buffer, u_int& offset) const override;
+
+  void deserialize(const char* buffer, u_int& offset) override;
+  
+  void handle() override;
 };
 
 #endif

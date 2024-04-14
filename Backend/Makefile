@@ -11,7 +11,7 @@ OBJ_EXTENSION:=o
 DEP_EXTENSION:=d
 
 CC=g++
-CXXFLAGS=-c -std=c++20 -Wall -Wshadow -Wunused-result -Wextra -Wpedantic \
+CXXFLAGS=-c -g -std=c++20 -Wall -Wshadow -Wunused-result -Wextra -Wpedantic \
 -Wconversion -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused \
 -Wsign-conversion -Wnull-dereference -Wdouble-promotion -Wformat=2 \
 -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wuseless-cast \

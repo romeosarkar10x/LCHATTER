@@ -106,7 +106,7 @@ public:
   
   void clear(){ mvprintf(0, 0, "%*c", _m_height * _m_width, ' '); refresh(); }
 
-  enum Direction : unsigned int { UP, DOWN, LEFT, RIGHT };
+  enum Direction : u_int { UP, DOWN, LEFT, RIGHT };
   
   void move_cursor(Direction direction)
   {
