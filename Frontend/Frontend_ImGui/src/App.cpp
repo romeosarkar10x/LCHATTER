@@ -490,12 +490,12 @@ void App::ShowChatWindow()
           if (ImGui::BeginTabItem("Chats"))
           {
 
-            for (int cnt = 0; const ChatMessage &m : itr->get_chat().get_messages())
+            for (const ChatMessage &m : itr->get_chat().get_messages())
             {
               static float wrap_width = 200.0f;
               wrap_width = ImGui::GetContentRegionAvail().x * 0.6f;
-              // if (m.is_me())
-              if (cnt++ & 1)
+              // if (cnt++ & 1)
+              if (m.sender_is_me())
               {
                 // Calculate text width with wrapping
                 ImVec2 textSize = ImGui::CalcTextSize(m.get_text(), NULL, false, wrap_width);

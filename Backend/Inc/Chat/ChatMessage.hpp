@@ -21,7 +21,8 @@ public:
   const TimePoint&  get_time()    const;
   const User&       get_sender()  const;
 
-  bool is_me() const;
+  bool sender_is_me() const;
+  void toggle_sender_is_me();
 
   bool operator<(ChatMessage& rhs);
   
@@ -35,7 +36,7 @@ protected:
   String    _m_text;
   TimePoint _m_timepoint { 0 };
 
-  bool      _m_is_me { false };
+  bool      _m_sender_is_me;
 
   friend std::ostream& operator<<(std::ostream& o, const ChatMessage& chat_message);
 };

@@ -5,13 +5,14 @@
 ChatMessage::ChatMessage(const User& sender, const String& message, bool is_me) :
   _m_sender { sender },
   _m_text   { message },
-  _m_is_me  { is_me } {}
+  _m_sender_is_me  { is_me } { std::cout << "sender_is_me: " << _m_sender_is_me << std::endl; }
 
 const String&     ChatMessage::get_text() const { return _m_text; }
 const TimePoint&  ChatMessage::get_time() const { return _m_timepoint; }
 const User&       ChatMessage::get_sender() const { return _m_sender; }
 
-bool              ChatMessage::is_me() const { return _m_is_me; }
+bool ChatMessage::sender_is_me() const { return _m_sender_is_me; }
+void ChatMessage::toggle_sender_is_me() { _m_sender_is_me = (_m_sender_is_me == false) ? true : false; }
 
 bool ChatMessage::operator<(ChatMessage& rhs) { return _m_timepoint < rhs._m_timepoint; }
 
@@ -27,7 +28,7 @@ void ChatMessage::serialize(char* const buffer, u_int& offset) const
   Serializer::serialize(_m_sender, buffer, offset);
   Serializer::serialize(_m_text, buffer, offset);
   Serializer::serialize(_m_timepoint, buffer, offset);
-  Serializer::serialize(_m_is_me, buffer, offset);
+  Serializer::serialize(_m_sender_is_me, buffer, offset);
 }
 
 void ChatMessage::deserialize(const char* const buffer, u_int& offset)
@@ -35,7 +36,7 @@ void ChatMessage::deserialize(const char* const buffer, u_int& offset)
   Deserializer::deserialize(_m_sender, buffer, offset);
   Deserializer::deserialize(_m_text, buffer, offset);
   Deserializer::deserialize(_m_timepoint, buffer, offset);
-  Deserializer::deserialize(_m_is_me, buffer, offset);
+  Deserializer::deserialize(_m_sender_is_me, buffer, offset);
 }
 
 std::ostream& operator<<(std::ostream& __o, const ChatMessage& chat_message)

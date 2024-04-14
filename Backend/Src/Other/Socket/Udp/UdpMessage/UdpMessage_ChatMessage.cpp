@@ -28,11 +28,13 @@ void UdpMessage_ChatMessage::deserialize(const char* const buffer, u_int& offset
 
 void UdpMessage_ChatMessage::handle()
 {
-  auto connections = AppBackend::get_connections();
+  auto& connections = AppBackend::get_connections();
 
   auto itr = std::ranges::find(connections, _m_sender,
     [] (const Connection& c) -> const User& { return c.get_user(); }
   );
-
+  
+  std::cout << "HERE" << std::endl;
+  toggle_sender_is_me();
   itr->get_chat().emplace(static_cast<ChatMessage&&>(*this));
 }

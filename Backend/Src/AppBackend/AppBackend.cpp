@@ -38,66 +38,69 @@ void AppBackend::handle_receive()
   logger << Logger::timestamp << "RECEIVE_BEGIN " << Logger::endl;
   
   UdpMessage* m = _s_receiver.receive();
-  Address sender_addr = _s_receiver.get_sender_address();
+  m->handle();
+  // UdpMessage* m = _s_receiver.receive();
+  // Address sender_addr = _s_receiver.get_sender_address();
 
-  if(m->get_type() == UdpMessage::Type::NONE) { return; }
+  // if(m->get_type() == UdpMessage::Type::NONE) { return; }
   
-  switch(m->get_type())
-  {
+  // switch(m->get_type())
+  // {
 
-  case UdpMessage::Type::CONNECTION_REQUEST:
-  {
-    UdpMessage_ConnectionRequest* ptr_r = static_cast<UdpMessage_ConnectionRequest*>(m);
-    auto& user = ptr_r->get_user();
-    auto itr = std::ranges::find(_s_incoming_requests, user, [] (const ConnectionRequest& r) { return r.get_user(); });
+  // case UdpMessage::Type::CONNECTION_REQUEST:
+  // {
+  //   UdpMessage_ConnectionRequest* ptr_r = static_cast<UdpMessage_ConnectionRequest*>(m);
+  //   auto& user = ptr_r->get_user();
+  //   auto itr = std::ranges::find(_s_incoming_requests, user, [] (const ConnectionRequest& r) { return r.get_user(); });
 
-    if(itr != _s_incoming_requests.end())
-    {
-      itr->get_timepoint().set_time(ptr_r->get_timepoint());
-      break;
-    }
+  //   if(itr != _s_incoming_requests.end())
+  //   {
+  //     itr->get_timepoint().set_time(ptr_r->get_timepoint());
+  //     break;
+  //   }
 
-    _s_incoming_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
-    _s_incoming_requests.back().get_address().set_ip_address(sender_addr);
-    break;
-  }
+  //   _s_incoming_requests.push_back(*static_cast<UdpMessage_ConnectionRequest*>(m));
+  //   _s_incoming_requests.back().get_address().set_ip_address(sender_addr);
+  //   break;
+  // }
   
-  case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
-  {
-    const String& id = static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_user().get_id();
-    auto itr = std::ranges::find(_s_outgoing_requests, id, _Projection);
+  // case UdpMessage::Type::CONNECTION_REQUEST_ACCEPTED:
+  // {
+  //   const String& id = static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_user().get_id();
+  //   auto itr = std::ranges::find(_s_outgoing_requests, id, _Projection);
 
-    itr->set_state(ConnectionRequest::State::ACCEPTED);
-    itr->get_address().set_ip_address(sender_addr);
-    static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_address().set_ip_address(sender_addr);
+  //   itr->set_state(ConnectionRequest::State::ACCEPTED);
+  //   itr->get_address().set_ip_address(sender_addr);
+  //   static_cast<UdpMessage_ConnectionRequest_Accepted*>(m)->get_address().set_ip_address(sender_addr);
 
-    if(std::ranges::find(_s_connections, id, [] (const Connection& c) -> const String& { return c.get_user().get_id(); }) != _s_connections.end())
-    {
-      break;
-    }
+  //   if(std::ranges::find(_s_connections, id, [] (const Connection& c) -> const String& { return c.get_user().get_id(); }) != _s_connections.end())
+  //   {
+  //     break;
+  //   }
     
-    _s_connections.emplace_back(*static_cast<UdpMessage_ConnectionRequest_Accepted*>(m));
-    break;
-  }
+  //   _s_connections.emplace_back(*static_cast<UdpMessage_ConnectionRequest_Accepted*>(m));
+  //   break;
+  // }
   
-  case UdpMessage::Type::CONNECTION_REQUEST_REJECTED:
-    break;
+  // case UdpMessage::Type::CONNECTION_REQUEST_REJECTED:
+  //   break;
   
-  case UdpMessage::Type::CHAT_MESSAGE:
-  {
-    auto id = static_cast<UdpMessage_ChatMessage*>(m)->get_sender().get_id();
-    auto itr = std::ranges::find(_s_connections, id, _Projection);
+  // case UdpMessage::Type::CHAT_MESSAGE:
+  // {
+  //   auto id = static_cast<UdpMessage_ChatMessage*>(m)->get_sender().get_id();
+  //   // UdpMessage_ChatMessage.
+  //   auto itr = std::ranges::find(_s_connections, id, _Projection);
 
-    itr->get_chat().emplace(static_cast<ChatMessage>(*static_cast<UdpMessage_ChatMessage*>(m)));
-    break;
-  }
+  //   itr->get_chat().emplace(static_cast<ChatMessage>(*static_cast<UdpMessage_ChatMessage*>(m)));
+  //   break;
+  // }
   
-  case UdpMessage::Type::PING:
-    break;
+  // case UdpMessage::Type::PING:
+  //   break;
 
-  default:
-    break;
-  }
+  // default:
+  //   break;
+  // }
 
   logger << Logger::timestamp << "RECEIVE_END   " << m->get_type() << Logger::endl;
 }
